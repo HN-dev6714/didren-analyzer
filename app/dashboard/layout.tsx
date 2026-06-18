@@ -1,6 +1,18 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
 
+/**
+ * The Dashboard Page
+ * 
+ * This page will contain two pathways: to the testing or analyzing page.
+ * After confirming that the user is indeed a valid user and is logged in, 
+ * we offer the options to go to the testing or analyzing page. 
+ * Maybe we create a log out feature, or a user account page where users
+ * can log out, delete account, or change parameters. 
+ * 
+ * @param param0 children
+ * @returns i'm really not sure what this returns
+ */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
@@ -14,18 +26,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // User is valid! Render the internal application layout
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-50">
-      <aside className="w-64 border-r border-zinc-800 p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-teal-400 tracking-tight mb-8">HMD Control Center</h2>
-          <nav className="space-y-2">
-            <a href="/dashboard" className="block text-sm font-medium text-zinc-300 hover:text-white">Active Devices</a>
-          </nav>
-        </div>
-        <div className="text-xs text-zinc-500">Logged in as:<br/>{user.email}</div>
-      </aside>
-      <main className="flex-1 overflow-y-auto p-10">
+    <div className="flex h-screen justify-center bg-zinc-100 text-zinc-800">
+      <main className="flex-1 flex flex-col min-h-full overflow-y-auto p-10">
         {children}
+
+        <div className="mt-auto text-xs text-zinc-800 pt-6">
+          Logged in as:<br/>{user.email}
+        </div>
       </main>
     </div>
   )
