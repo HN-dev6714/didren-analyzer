@@ -8,9 +8,11 @@ import Link from "next/link"
 export default function DashboardOverviewPage() {
   return (
     <div className="relative flex flex-col w-full justify-center items-center p-8">
-      <button className="absolute top-8 right-8 bg-zinc-800 text-zinc-100 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
-        Log Out
-      </button>
+      <Link href="/">
+        <button className="absolute top-8 right-8 bg-zinc-800 text-zinc-100 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
+          Log Out
+        </button>
+      </Link>
 
       <div className="flex flex-col justify-center items-center mb-16">
         <h1 className="text-3xl font-bold text-teal-700 tracking-tight mb-4 text-center">
