@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { useSocket} from "@/app/context/SocketContext";
 /**
  * This is where the Clinician/Researcher will test patients
  * 
@@ -20,6 +21,23 @@ import Link from "next/link"
  * 
  */
 export default function TestingPage(){
+
+    const { socket, isConnected } = useSocket();
+
+    function serverCheck() {
+        if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
+            const clickTestMessage = {
+                targetId: "TEST_THERAPIST_123",
+                action: "BUTTON_CLICK_TEST",
+                payload: { text: "Clicked cleanly using React context hooks!" }
+            };
+            
+            socket.send(JSON.stringify(clickTestMessage));
+            console.log("Message successfully dispatched.");
+        } else {
+            console.error("The managed socket is currently disconnected or offline.");
+        }
+    }
 
     return(
         <div>
@@ -73,6 +91,7 @@ export default function TestingPage(){
                         <p className="text-sm">Stat 10:</p>
                         <p className="text-sm">Stat 11:</p>
                         <p className="text-sm">Stat 12:</p>
+                        <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-800 text-white rounded">Test connection to web socket</button>
                     </div>
                     <div className="">
                         <h2 className="text-center font-bold text-2xl text-zinc-700 mb-4">

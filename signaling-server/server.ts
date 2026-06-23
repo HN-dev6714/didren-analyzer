@@ -1,3 +1,4 @@
+
 import { WebSocket, WebSocketServer } from 'ws';
 import * as http from 'http';
 
@@ -11,8 +12,10 @@ const therapists = new Map<string, WebSocket>();
 const headsets = new Map<string, WebSocket>();
 
 const server = http.createServer();
-const wss = new WebSocketServer({ server });
 const PORT = process.env.PORT || 8080;
+const wss = new WebSocketServer({ server });
+
+console.log(`[DEBUG] WebSocket engine instantiated directly on port ${PORT}`);
 
 wss.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
     
@@ -27,6 +30,8 @@ wss.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
         headsets.set(clientId, socket);
         console.log(`Headset Registered: ${ clientId }`);
     } else if (clientRole === 'therapist' && clientId){
+        //pass Supabase JWT Access Token through connection URL parameters
+        //to verify therapist identity
         therapists.set(clientId, socket);
         console.log(`Therapist Registered: ${clientId}`);
     }
@@ -41,10 +46,13 @@ wss.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
     })
 
     //inside socket.on('message') listener, parse JSON payload
-    socket.on('message', (rawData: string) => {
-        handleIncomingRoute(rawData, socket);
+    socket.on('message', (rawData: Buffer) => {
+        const textData = rawData.toString();
+        console.log(`Received: ${textData}`);
+        handleIncomingRoute(textData, socket);
     });
 });
+
 
 function handleIncomingRoute(rawData: string, senderSocket: WebSocket){
     //read targetHeadset string look it up in headsets Map
@@ -66,7 +74,7 @@ function handleIncomingRoute(rawData: string, senderSocket: WebSocket){
         console.error("Failed to route incoming message payload: ", error);
     }
 }
-
+ 
 server.listen(PORT, () => {
     console.log(`Signaling server traffic controller active on port ${PORT}`);
 });
