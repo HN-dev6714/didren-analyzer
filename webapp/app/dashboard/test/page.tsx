@@ -1,6 +1,15 @@
 "use client"
 import Link from "next/link"
 import { useSocket} from "@/app/context/SocketContext";
+import { useEffect, useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+
+
+interface DeviceCode {
+    code: string;
+    expiration: string;
+    headset_serial: string;
+}
 /**
  * This is where the Clinician/Researcher will test patients
  * 
@@ -22,6 +31,10 @@ import { useSocket} from "@/app/context/SocketContext";
  */
 export default function TestingPage(){
 
+    const [devices, setDevices] = useState<DeviceCode[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
+    const supabase = createClient();
     const { socket, isConnected } = useSocket();
 
     function serverCheck() {
@@ -39,6 +52,37 @@ export default function TestingPage(){
         }
     }
 
+    useEffect(() => {
+        async function fetchHeadsetData() {
+            try{
+                setIsLoading(true);
+                const { data: {user}, error: userError } = await supabase.auth.getUser();
+                
+                if(!user) return;
+
+                if(userError) throw userError;
+                const { data, error: fetchError } = await supabase
+                    .from('device_codes')
+                    .select(`code, expiration, headset_serial, therapist_headset_map!inner(therapist_id)`)
+                    .eq('therapist_headset_map.therapist_id', user.id)
+                    .gt('expiration', new Date().toISOString());; //not finished! headsets that are with the therapist!
+                
+                if (fetchError) throw fetchError;
+                setDevices(data || []);
+            } catch (error: any){
+                console.error('Error fetching data: ', error);
+                setErrorMessage('Failed to load headsets');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchHeadsetData();
+    }, []);
+
+    if (isLoading) return <div>Loading...</div>;
+    if (errorMessage) return <div>Error! {errorMessage}</div>;
+
     return(
         <div>
             <div className="flex flex-col justify-center items-center w-full">
@@ -55,6 +99,11 @@ export default function TestingPage(){
                         Select Headset:
                     </h1>
                     <select>
+                        {devices.map ((device) => (
+                            <option value={device.headset_serial}>
+                                Headset {device.expiration}
+                            </option>
+                        ))}
                         <option value="Sample Headset A">Sample Headset A</option>
                         <option value="Sample Headset B">Sample Headset B</option>
                         <option value="Sample Headset C">Sample Headset C</option>

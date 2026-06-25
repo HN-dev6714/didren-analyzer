@@ -1,6 +1,21 @@
 "use client"
+import { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link"
+import { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
 
+
+interface Session{
+    session_id: string; // or number, depending on your DB configuration
+    headset_serial_number: string;
+    patient_name?: string;      // Optional fields for your filters
+    test_parameters?: string;   
+    created_at?: string;
+    // This matches the nested object structure Supabase returns for the join:
+    therapist_headset_map: {
+        therapist_id: string;
+    }[];
+}
 /**
  * This is where the Clinician/Researcher will analyze data
  * 
@@ -8,7 +23,7 @@ import Link from "next/link"
  * - Depending on whether the role is a Clinician or a Researcher, specific data will be shown
  * (so some pieces of data such as acceleration may not be visible for Clinicians)
  * - We will fetch all headsets in the Therapist-Headset intermediary table and list all sessions possible 
- * in a...drop-down menu? A calendar? 
+ * in a...drop-down menu? A calendar?  (we already did this in a very different page. )
  * - Users can choose by session or select multiple sessions with filters. They can filter by accessible
  * patient name, patient parameters, a specific test parameter, or a set of test parameters
  * - There will be options to select what types of data will be shown. 
@@ -16,11 +31,62 @@ import Link from "next/link"
  * - They will also be shown overall statistics of that session below the graph: max's and min's will have 
  * to be recalculated if multiple sessions are selected. Averages and means could be a little
  * complicated as some sessions are longer than others...we're wondering if we must weight them properly.
- * - Obviously a back button to return to the dashboard. 
  */
 
+export default function AnalyzingPage() {
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [sessions, setSessions] = useState<Session[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
+    
+    const supabase = createClient();
+    const showAdvancedMetrics = userRole === 'researcher';
 
-export default function AnalyzingPage(){
+    useEffect(() => {
+
+        async function retrieveSessions() {
+            try {
+                setIsLoading(true);
+                
+                //get therapist info
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError) throw userError;
+                if (!user) return;
+
+                // Extract user role (assuming it's stored in user_metadata)
+                const role = user.user_metadata?.role || 'clinician';
+                setUserRole(role);
+
+                // We must include 'therapist_headset_map!inner(therapist_id)' inside the quotes!
+                const { data: sessionList, error: fetchError } = await supabase
+                    .from('sessions')
+                    .select(`
+                        session_id, 
+                        headset_serial_number,
+                        therapist_headset_map!inner(therapist_id)
+                    `)
+                    .eq('therapist_headset_map.therapist_id', user.id);
+
+                if (fetchError) throw fetchError;
+                
+                // Cast our data over to our state hook array
+                setSessions((sessionList as unknown as Session[]) || []);
+
+            } catch (error: any) {
+                console.error('Error fetching data: ', error);
+                setErrorMessage(error.message || 'Failed to load headsets');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        retrieveSessions();
+    }, []); // FIX: Added the empty dependency array to prevent the infinite loop!
+
+    if (isLoading) return <div>Loading diagnostic metrics...</div>;
+    if (errorMessage) return <div>Error! {errorMessage}</div>;
+
+
     return(
         <div className="flex flex-col">
             <div className="justify-center items-center mb-10">
