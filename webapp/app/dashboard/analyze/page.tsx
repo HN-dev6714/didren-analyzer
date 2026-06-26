@@ -47,12 +47,24 @@ export default function AnalyzingPage() {
         async function retrieveSessions() {
             try {
                 setIsLoading(true);
-                
+                setErrorMessage('');
                 //get therapist info
                 const { data: { user }, error: userError } = await supabase.auth.getUser();
                 if (userError) throw userError;
                 if (!user) return;
 
+                const { data: mappings, error: mapError } = await supabase
+                    .from('therapist_headset_map')
+                    .select('headset_serial')
+                    .eq('therapist_id', user.id);
+
+                if (mapError) throw mapError;
+                if (!mappings || mappings.length === 0) {
+                    setSessions([]);
+                    return;
+                }
+                if (mapError) throw mapError;
+                const therapistSerials = mappings.map(m => m.headset_serial);
                 // Extract user role (assuming it's stored in user_metadata)
                 const role = user.user_metadata?.role || 'clinician';
                 setUserRole(role);
@@ -63,9 +75,9 @@ export default function AnalyzingPage() {
                     .select(`
                         session_id, 
                         headset_serial_number,
-                        therapist_headset_map!inner(therapist_id)
+                        session_timestamp
                     `)
-                    .eq('therapist_headset_map.therapist_id', user.id);
+                    .in('headset_serial)number', therapistSerials);
 
                 if (fetchError) throw fetchError;
                 
@@ -104,120 +116,14 @@ export default function AnalyzingPage() {
                     Graph Filters
                 </h2>
                 <div className="flex gap-2">
-                    <div className="flex gap-1">
-                        <p>Filter 1:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 2:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 3:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 4:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 5:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 6:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 7:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 8:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    <div className="flex gap-1">
-                        <p>Filter 1:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 2:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 3:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 4:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 5:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 6:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 7:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
-                    <div className="flex gap-1">
-                        <p>Filter 8:</p>
-                        <input 
-                            type="text" 
-                            className="text-small w-28 h-6 px-3 py-2 bg-zinc-200 border border-zinc-200 rounded text-zinc-800 focus:outline-none focus:border-teal-500"
-                        />
-                    </div>
+                    
+                    <Link 
+                        href="/dashboard/analyze/select-session"
+                        className="flex justify-center items-center rounded h-8 w-32 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
+                    >
+                        Select or Filter Sessions
+                    </Link>
+                    
                 </div>
             </div>
             <div className="flex w-full justify-center items-center">

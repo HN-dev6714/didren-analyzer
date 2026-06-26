@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useDevices } from '@/app/context/DeviceContext';
 import { createClient } from '@/utils/supabase/client';
 
 export function AddHeadsetForm() {
@@ -8,6 +9,7 @@ export function AddHeadsetForm() {
     const [pinInput, setPinInput] = useState('');
     const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | null, text: string}>({ type: null, text: ''});
     const [isLoading, setIsLoading] = useState(false);
+    const { addDevice } = useDevices();
 
     const supabase = createClient();
 
@@ -47,7 +49,7 @@ export function AddHeadsetForm() {
 
             //link therapist to headset
             const { error: linkError } = await supabase
-                .from('therapist_devices')
+                .from('therapist_headset_map')
                 .insert({
                     therapist_id: user.id,
                     headset_serial: validCodeEntry.headset_serial
@@ -63,6 +65,12 @@ export function AddHeadsetForm() {
                 return;
             }
 
+            addDevice({
+                headset_serial: validCodeEntry.headset_serial,
+                code: 'PAIRED',
+                expiration: 'Permanent'
+            });
+            
             await supabase
                 .from('device_codes')
                 .delete()
