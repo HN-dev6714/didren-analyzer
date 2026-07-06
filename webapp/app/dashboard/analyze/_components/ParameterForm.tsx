@@ -5,7 +5,7 @@ import React from 'react';
 function ParameterComponent({ name }: { name: string }) {
   return (
     <div className="w-full max-w-xs my-2">
-      <label className="block text-xs font-semibold text-zinc-500 capitalize mb-1">
+      <label className="block text-xs font-semibold text-zinc-500 mb-1">
         {name}
       </label>
       <input 

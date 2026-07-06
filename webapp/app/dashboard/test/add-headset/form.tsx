@@ -16,7 +16,7 @@ export function AddHeadsetForm() {
     const VerifyCode = async() => {
         //verifies if code entered matches any of the codes in the database
         //is this function supposed to be here?
-        if (pinInput.length > 6){
+        if (pinInput.length != 6){
             setStatusMessage({ type: 'error', text: 'Please enter a valid 6-digit code'});
             return;
         }
@@ -33,16 +33,31 @@ export function AddHeadsetForm() {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             if (userError || !user) throw new Error ('Authentication error. Please log in again.');
 
+            const now = new Date();
+
             //look in device_codes for match and expiration time
             const { data: validCodeEntry, error: codeError } = await supabase
                 .from('device_codes')
                 .select('headset_serial, expiration')
                 .eq('code', pinInput)
-                .gt('expiration', new Date().toISOString())
+                .gt('expiration', now.toISOString())
                 .maybeSingle();
+
+                if (codeError) {
+                    console.error("Database query failed:", codeError);
+                } else {
+                    console.log("--- Debugging Device Code Records ---");
+                    console.table(validCodeEntry);
+                }
             
             if (codeError || !validCodeEntry){
                 setStatusMessage({ type: 'error', text: 'Invalid or expired code. Please try again.'});
+                if(!validCodeEntry){
+                    console.error('not valid code')
+                }
+                else{
+                    console.error(codeError);
+                }
                 setIsLoading(false);
                 return;
             }
@@ -52,7 +67,7 @@ export function AddHeadsetForm() {
                 .from('therapist_headset_map')
                 .insert({
                     therapist_id: user.id,
-                    headset_serial: validCodeEntry.headset_serial
+                    headset_serial_number: validCodeEntry.headset_serial
                 });
 
             if (linkError) {
