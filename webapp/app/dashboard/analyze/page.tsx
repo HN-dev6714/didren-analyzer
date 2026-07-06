@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link"
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import AnalysisModal from './_components/AnalysisModal'
 
 
 interface Session{
@@ -41,6 +42,7 @@ export default function AnalyzingPage() {
     
     const supabase = createClient();
     const showAdvancedMetrics = userRole === 'researcher';
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
 
@@ -55,7 +57,7 @@ export default function AnalyzingPage() {
 
                 const { data: mappings, error: mapError } = await supabase
                     .from('therapist_headset_map')
-                    .select('headset_serial')
+                    .select('headset_serial_number')
                     .eq('therapist_id', user.id);
 
                 if (mapError) throw mapError;
@@ -64,7 +66,7 @@ export default function AnalyzingPage() {
                     return;
                 }
                 if (mapError) throw mapError;
-                const therapistSerials = mappings.map(m => m.headset_serial);
+                const therapistSerials = mappings.map(m => m.headset_serial_number);
                 // Extract user role (assuming it's stored in user_metadata)
                 const role = user.user_metadata?.role || 'clinician';
                 setUserRole(role);
@@ -77,7 +79,7 @@ export default function AnalyzingPage() {
                         headset_serial_number,
                         session_timestamp
                     `)
-                    .in('headset_serial)number', therapistSerials);
+                    .in('headset_serial_number', therapistSerials);
 
                 if (fetchError) throw fetchError;
                 
@@ -93,7 +95,7 @@ export default function AnalyzingPage() {
         }
 
         retrieveSessions();
-    }, []); // FIX: Added the empty dependency array to prevent the infinite loop!
+    }, []); // Added the empty dependency array to prevent the infinite loop!
 
     if (isLoading) return <div>Loading diagnostic metrics...</div>;
     if (errorMessage) return <div>Error! {errorMessage}</div>;
@@ -115,16 +117,19 @@ export default function AnalyzingPage() {
                 <h2 className="text-center font-bold text-xl  text-zinc-800 mb-2">
                     Graph Filters
                 </h2>
-                <div className="flex gap-2">
                     
-                    <Link 
-                        href="/dashboard/analyze/select-session"
-                        className="flex justify-center items-center rounded h-8 w-32 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
-                    >
-                        Select or Filter Sessions
-                    </Link>
+                <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex justify-center items-center text-center rounded h-8 w-48 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
+                >
+                    Select or Filter Sessions
+                </button>
+                <AnalysisModal
+                    isOpen = {isModalOpen}
+                    onClose = {() => setIsModalOpen(false)}
+                />
+
                     
-                </div>
             </div>
             <div className="flex w-full justify-center items-center">
                 <canvas className="w-256 h-128 mt-8 mb-4 bg-zinc-700">
