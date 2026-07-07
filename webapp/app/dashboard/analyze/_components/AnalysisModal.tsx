@@ -2,14 +2,20 @@
 
 import React from 'react';
 import ParameterForm from './ParameterForm';
-import SessionList from './SessionList'
+import SessionList from './SessionList';
+import { Session } from '../page';
 
 interface AnalysisModalProps{
     isOpen: boolean;
     onClose: () => void;
+    sessionList: Session[];
+    selectedIds: string[];
+    onToggleSession: (id: string) => void;
+    updateSessions: () => void;
 }
 
-export default function AnalysisModal({isOpen, onClose}: AnalysisModalProps){
+
+export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds, onToggleSession, updateSessions}: AnalysisModalProps){
     if(!isOpen) return null;
 
 
@@ -37,7 +43,12 @@ export default function AnalysisModal({isOpen, onClose}: AnalysisModalProps){
                 </div>
 
                 <div className="md:col-span-7 p-6 overflow-y-auto bg-white">
-                    <SessionList />
+                    <SessionList 
+                        sessionList={sessionList}
+                        selectedIds={selectedIds}
+                        onToggleSession={onToggleSession}
+                        updateSessions= {updateSessions}
+                    />
                 </div>
 
                 </div>
