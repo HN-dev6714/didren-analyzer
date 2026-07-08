@@ -39,7 +39,9 @@ export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
                 
                 <div className="md:col-span-5 p-6 border-r border-zinc-200 overflow-y-auto bg-zinc-50/50">
-                    <ParameterForm />
+                    <ParameterForm 
+                        onClose={onClose}
+                    />
                 </div>
 
                 <div className="md:col-span-7 p-6 overflow-y-auto bg-white">

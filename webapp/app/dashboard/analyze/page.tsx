@@ -59,7 +59,7 @@ export const METRIC_OPTIONS = [
   { value: 'vel_z',     label: 'Velocity (Z-Axis)' },
   { value: 'pos_x',     label: 'Position (X-Axis)' },
   { value: 'pos_y',     label: 'Position (Y-Axis)' },
-  { value: 'pos_z',     label: 'Position (X-Axis)' },
+  { value: 'pos_z',     label: 'Position (Z-Axis)' },
   { value: 'ang_acc_x', label: 'Angular Acceleration (X-Axis)' },
   { value: 'ang_acc_y', label: 'Angular Acceleration (Y-Axis)' },
   { value: 'ang_acc_z', label: 'Angular Acceleration (Z-Axis)' },
@@ -99,6 +99,7 @@ export default function AnalyzingPage() {
     const supabase = createClient();
     const showAdvancedMetrics = userRole === 'researcher';
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAverage, setIsAverage] = useState<boolean>(false);
 
     const [activeParameter, setActiveParameter] = useState<MetricParameter>('acc_x');
     const lineColors = ['#0f766e', '#4338ca', '#b45309', '#be185d', '#1d4ed8'];
@@ -141,14 +142,13 @@ export default function AnalyzingPage() {
 
     const handleSubmitSelection = () => {
         console.log("Sending these IDs to Recharts:", selectedSessionIds);
-        // Close the modal?
+        setIsModalOpen(false); //more gracefully perhaps? Transition? 
 
         // Pass selectedSessionIds to your Recharts graph component
     };
 
 
     useEffect(() => {
-
         async function retrieveSessions() {
             try {
                 setIsLoading(true);
@@ -248,11 +248,11 @@ export default function AnalyzingPage() {
                 </h1>
             </div>
             <div className="flex flex-col gap-4 mx-auto">
-                <h2 className="text-center font-bold text-xl  text-zinc-800 mb-2">
+                <h2 className="text-center font-bold text-xl justify-center items-center mx-auto text-zinc-800 mb-2">
                     Graph Filters
                 </h2>
                 
-                <div className="justify-center items-center mx-auto">
+                <div className="mx-auto">
                     <button 
                         onClick={() => setIsModalOpen(true)}
                         className="flex justify-center items-center text-center rounded h-8 w-48 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
@@ -308,8 +308,8 @@ export default function AnalyzingPage() {
                 </div>
             </div>
             <div className="flex">
-                <button className="">
-                    Average All Selected Sessions
+                <button onClick={() => setIsAverage(!isAverage)} className="rounded h-8 w-64 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700">
+                   {isAverage ? 'Reset to Individual Sessions' : 'Average All Selected Sessions'}
                 </button>
             </div>
             <div className="flex flex-col w-full justify-center items-center">
