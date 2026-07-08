@@ -14,9 +14,17 @@ export interface FilterConfig {
 export const TEAMP_FILTERS: FilterConfig[] = [
   { id: 'age',      label: 'Age Group',    minLimit: 18,  maxLimit: 100, step: 1,   unit: 'yrs' },
   { id: 'bmi',      label: 'BMI Range',    minLimit: 15,  maxLimit: 45,  step: 0.1, unit: '' },
-  { id: 'distance', label: 'Distance',     minLimit: 0,   maxLimit: 50,  step: 0.5, unit: 'm' },
   { id: 'height',   label: 'Height',       minLimit: 120, maxLimit: 220, step: 1,   unit: 'cm' },
   { id: 'weight',   label: 'Weight',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'distance',   label: 'Target Distance',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'angle',   label: 'Angle',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'space',   label: 'Space',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'accuracy',   label: 'Accuracy',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'radius',   label: 'Radius',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'target_height',   label: 'Target Weight',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'size',   label: 'Target Size',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'cycles',   label: 'Cycles',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'validation_time',   label: 'Validation Time',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
 ];
 
 interface ParameterSliderProps {
@@ -121,6 +129,12 @@ export default function ParameterForm({onClose} : ParameterProps) {
     e.preventDefault();
     console.log("Submitting your dynamic 20-slider values:", filterStates);
     //how do we turn the filter states into a database query and update accordingly
+
+    //all sessions are now unchecked?
+    //the sessions that fit the parameters are part of the sessionIds thing
+    //they are also all checked
+    //update sessions has been called
+
     onClose();
   };
 

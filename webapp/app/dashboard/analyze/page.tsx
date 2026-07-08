@@ -147,6 +147,66 @@ export default function AnalyzingPage() {
         // Pass selectedSessionIds to your Recharts graph component
     };
 
+    const handleApplyFilters = async (filterStates: Record<string, [number, number]>) => {
+        setIsLoading(true);
+        try {
+            //Add 'therapist_headset_map' to the selection layout matrix
+            let query = supabase
+            .from('sessions') 
+            .select(`
+                session_id,
+                headset_serial_number,
+                patient_id,
+                config_id,
+                session_timestamp,
+                motion_data,
+                therapist_headset_map ( therapist_id ),
+                patients ( first_name, surname )
+            `);
+
+            //Loop through every active slider position key
+            Object.entries(filterStates).forEach(([id, [minVal, maxVal]]) => {
+            if (['age', 'bmi', 'height', 'weight'].includes(id)) {
+                query = query.gte(`patients.${id}`, minVal).lte(`patients.${id}`, maxVal);
+            } else {
+                query = query.gte(`test_settings.${id}`, minVal).lte(`test_settings.${id}`, maxVal);
+            }
+            });
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            // Transform raw database rows to fit your strict Session format
+            const formattedSessions: Session[] = (data || []).map((row: any) => ({
+            session_id: row.session_id,
+            headset_serial_number: row.headset_serial_number,
+            patient_id: row.patient_id,
+            config_id: row.config_id,
+            session_timestamp: row.session_timestamp,
+            motion_data: row.motion_data || [],
+            
+            // Satisfies the strict array requirement
+            therapist_headset_map: row.therapist_headset_map || [],
+            
+            // Flattens Supabase's relation array down to a single object or null
+            patients: Array.isArray(row.patients) && row.patients.length > 0 
+                ? {
+                    first_name: row.patients[0].first_name,
+                    surname: row.patients[0].surname
+                }
+                : null
+            }));
+
+            // 4. Update state safely. TypeScript is now 100% happy!
+            setSessions(formattedSessions);
+            
+        } catch (err) {
+            console.error("Supabase pipeline execution failed:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     useEffect(() => {
         async function retrieveSessions() {
@@ -231,7 +291,7 @@ export default function AnalyzingPage() {
         retrieveSessions();
     }, []); // Added the empty dependency array to prevent the infinite loop!
 
-    if (isLoading) return <div>Loading diagnostic metrics...</div>;
+    if (isLoading) return <div className="justify-center items-center text-center mx-auto">Loading diagnostic metrics...</div>;
     if (errorMessage) return <div>Error! {errorMessage}</div>;
 
 
@@ -247,22 +307,25 @@ export default function AnalyzingPage() {
                     Analyzer Application
                 </h1>
             </div>
-            <div className="flex flex-col gap-4 mx-auto">
+            <div className="flex flex-col gap-4 mx-auto w-full ">
                 <h2 className="text-center font-bold text-xl justify-center items-center mx-auto text-zinc-800 mb-2">
                     Graph Filters
                 </h2>
                 
-                <div className="mx-auto">
-                    <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex justify-center items-center text-center rounded h-8 w-48 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
-                    >
-                        Select or Filter Sessions
-                    </button>
+                <div>
+                    <div className="justify-center items-center">
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex justify-center items-center text-center mx-auto rounded h-8 w-48 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
+                        >
+                            Select or Filter Sessions
+                        </button>
+                    </div>
+ 
                     <select 
                         value={activeParameter} 
                         onChange={(e) => setActiveParameter(e.target.value as MetricParameter)}
-                        className="p-2 border border-zinc-200 rounded-lg bg-white text-sm text-zinc-700 font-medium focus:ring-2 focus:ring-teal-500 outline-none"
+                        className="justify-center p-2 items-center mx-auto border border-zinc-200 rounded-lg bg-white text-sm text-zinc-700 font-medium focus:ring-2 focus:ring-teal-500 outline-none"
                         >
                         {METRIC_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -307,7 +370,7 @@ export default function AnalyzingPage() {
                     </ResponsiveContainer>
                 </div>
             </div>
-            <div className="flex">
+            <div className="flex justify-center items-center mb-10">
                 <button onClick={() => setIsAverage(!isAverage)} className="rounded h-8 w-64 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700">
                    {isAverage ? 'Reset to Individual Sessions' : 'Average All Selected Sessions'}
                 </button>

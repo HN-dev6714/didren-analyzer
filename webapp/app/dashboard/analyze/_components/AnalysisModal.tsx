@@ -5,7 +5,7 @@ import ParameterForm from './ParameterForm';
 import SessionList from './SessionList';
 import { Session } from '../page';
 
-interface AnalysisModalProps{
+export interface AnalysisModalProps{
     isOpen: boolean;
     onClose: () => void;
     sessionList: Session[];
@@ -17,7 +17,6 @@ interface AnalysisModalProps{
 
 export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds, onToggleSession, updateSessions}: AnalysisModalProps){
     if(!isOpen) return null;
-
 
     return(
         <div className="fixed inset-0 bg-zinc-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">    
