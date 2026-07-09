@@ -12,10 +12,12 @@ export interface AnalysisModalProps{
     selectedIds: string[];
     onToggleSession: (id: string) => void;
     updateSessions: () => void;
+    onSubmitFilters: (filters: Record<string, [number, number]>) => void;
+    currentFilters: Record<string, [number, number]>;
 }
 
 
-export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds, onToggleSession, updateSessions}: AnalysisModalProps){
+export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds, onToggleSession, updateSessions, onSubmitFilters, currentFilters}: AnalysisModalProps){
     if(!isOpen) return null;
 
     return(
@@ -39,7 +41,8 @@ export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds
                 
                 <div className="md:col-span-5 p-6 border-r border-zinc-200 overflow-y-auto bg-zinc-50/50">
                     <ParameterForm 
-                        onClose={onClose}
+                        onSubmitFilters={onSubmitFilters}
+                        currentFilters={currentFilters}
                     />
                 </div>
 

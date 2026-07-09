@@ -2,42 +2,127 @@
 
 import React, { useState } from 'react';
 
-export interface FilterConfig {
-  id: string;        // Database column or state matching key
-  label: string;     // UI Title text
+export type FilterType = 'range' | 'select' | 'boolean';
+
+export interface BaseFilterConfig {
+  id: string;
+  label: string;
+  type: FilterType;
+}
+
+export interface RangeFilterConfig extends BaseFilterConfig {
+  type: 'range';
   minLimit: number;
   maxLimit: number;
   step: number;
   unit: string;
 }
 
+export interface SelectFilterConfig extends BaseFilterConfig {
+  type: 'select';
+  options: { value: string; label: string }[];
+  isMulti?: boolean; // Can use true for your multi-select requirements
+}
+
+export type FilterConfig = RangeFilterConfig | SelectFilterConfig;
+
 export const TEAMP_FILTERS: FilterConfig[] = [
-  { id: 'age',      label: 'Age Group',    minLimit: 18,  maxLimit: 100, step: 1,   unit: 'yrs' },
-  { id: 'bmi',      label: 'BMI Range',    minLimit: 15,  maxLimit: 45,  step: 0.1, unit: '' },
-  { id: 'height',   label: 'Height',       minLimit: 120, maxLimit: 220, step: 1,   unit: 'cm' },
-  { id: 'weight',   label: 'Weight',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'distance',   label: 'Target Distance',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'angle',   label: 'Angle',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'space',   label: 'Space',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'accuracy',   label: 'Accuracy',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'radius',   label: 'Radius',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'target_height',   label: 'Target Weight',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'size',   label: 'Target Size',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'cycles',   label: 'Cycles',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
-  { id: 'validation_time',   label: 'Validation Time',       minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { 
+    id: 'sex', 
+    label: 'Sex', 
+    type: 'select', 
+    options: [
+      { value: 'Male', label: 'Male' },
+      { value: 'Female', label: 'Female' }
+    ]
+  },
+  { 
+    id: 'test_name', 
+    label: 'Test Name', 
+    type: 'select', 
+    options: [
+      { value: 'Horizontal', label: 'Horizontal' },
+      { value: 'Vertical', label: 'Vertical' },
+      { value: 'Diagonal Left', label: 'Diagonal Left' }
+    ]
+  },
+  {
+    id: 'cursor_trail',
+    label: 'Cursor Trail',
+    type: 'select',
+    options: [
+      { value: 'true', label: 'Trail Enabled' },
+      { value: 'false', label: 'Trail Disabled' }
+    ]
+  },
+  {
+    id: 'test_audio',
+    label: 'Test Audio',
+    type: 'select',
+    options: [
+      { value: 'true', label: 'Audio Enabled' },
+      { value: 'false', label: 'Audio Disabled' }
+    ]
+  },
+
+  { id: 'age',      label: 'Age Group',    type: 'range', minLimit: 18,  maxLimit: 100, step: 1,   unit: 'yrs' },
+  { id: 'bmi',      label: 'BMI Range',    type: 'range', minLimit: 15,  maxLimit: 45,  step: 0.1, unit: '' },
+  { id: 'height',   label: 'Height',       type: 'range', minLimit: 120, maxLimit: 220, step: 1,   unit: 'cm' },
+  { id: 'weight',   label: 'Weight',       type: 'range', minLimit: 40,  maxLimit: 160, step: 0.5, unit: 'kg' },
+  { id: 'distance',   label: 'Target Distance',       type: 'range', minLimit: 1,  maxLimit: 5, step: 0.5, unit: '' },
+  { id: 'angle',   label: 'Angle',       type: 'range', minLimit: 0,  maxLimit: 60, step: 0.5, unit: ' degrees' },
+  { id: 'space',   label: 'Space',       type: 'range', minLimit: 0,  maxLimit: 8.7, step: 0.1, unit: '' },
+  { id: 'accuracy',   label: 'Accuracy',       type: 'range', minLimit: 1,  maxLimit: 4, step: 0.5, unit: '' },
+  { id: 'radius',   label: 'Radius',       type: 'range', minLimit: 0.1,  maxLimit: 0.7, step: 0.05, unit: '' },
+  { id: 'target_height',   label: 'Target Height',       type: 'range', minLimit: -1,  maxLimit: 1, step: 0.5, unit: '' },
+  { id: 'size',   label: 'Target Size',       type: 'range', minLimit: 0.25,  maxLimit: 1, step: 0.05, unit: '' },
+  { id: 'cycles',   label: 'Cycles',       type: 'range', minLimit: 1,  maxLimit: 10, step: 1, unit: ' cycles' },
+  { id: 'validation_time',   label: 'Validation Time',       type: 'range', minLimit: 0.1,  maxLimit: 1.5, step: 0.1, unit: ' sec' },
 ];
 
-interface ParameterSliderProps {
-  config: FilterConfig;
-  values: [number, number];
-  onChange: (min: number, max: number) => void;
-}
-
 interface ParameterProps{
-  onClose: () => void;
+  onSubmitFilters: (filters: Record<string, any>) => void; //can we keep this?
+  currentFilters?: Record<string, any>;
 }
 
-function ParameterSlider({ config, values, onChange }: ParameterSliderProps) {
+//for multi-select things
+function ParameterSelect({ config, value, onChange }: { config: SelectFilterConfig; value: string[]; onChange: (val: string[]) => void }) {
+  const handleToggleOption = (val: string) => {
+    // Basic multi-select logic: add if missing, remove if present
+    if (value.includes(val)) {
+      onChange(value.filter(item => item !== val));
+    } else {
+      onChange([...value, val]);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 border border-zinc-200 rounded-xl shadow-sm">
+      <label className="text-xs font-bold text-zinc-700 block mb-2">{config.label}</label>
+      <div className="flex flex-wrap gap-1.5">
+        {config.options.map((opt) => {
+          const isSelected = value.includes(opt.value);
+          return (
+            <button
+              type="button"
+              key={opt.value}
+              onClick={() => handleToggleOption(opt.value)}
+              className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition ${
+                isSelected 
+                  ? 'bg-teal-700 text-white border-teal-700 shadow-sm' 
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-100'
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfig; values: [number, number]; onChange: (min: number, mix: number) => void }) {
   const [min, max] = values;
 
   // Track handle logic to prevent min crossing over max
@@ -109,33 +194,30 @@ function ParameterSlider({ config, values, onChange }: ParameterSliderProps) {
   );
 }
 
-export default function ParameterForm({onClose} : ParameterProps) {
-  // 1. Instantly sets up reactive min/max pairs for all array configurations
-  const [filterStates, setFilterStates] = useState<Record<string, [number, number]>>(() => {
+export default function ParameterForm({onSubmitFilters, currentFilters} : ParameterProps) {
+  
+  const [filterStates, setFilterStates] = useState<Record<string, any>>(() => {
+    if (currentFilters && Object.keys(currentFilters).length > 0) {
+      return currentFilters;
+    }
+    
     return TEAMP_FILTERS.reduce((acc, filter) => {
-      acc[filter.id] = [filter.minLimit, filter.maxLimit];
+      if (filter.type === 'range') {
+        acc[filter.id] = [filter.minLimit, filter.maxLimit];
+      } else if (filter.type === 'select') {
+        acc[filter.id] = []; // Empty array means "everything selected/no constraint"
+      }
       return acc;
-    }, {} as Record<string, [number, number]>);
+    }, {} as Record<string, any>);
   });
 
-  const handleSliderChange = (id: string, min: number, max: number) => {
-    setFilterStates(prev => ({
-      ...prev,
-      [id]: [min, max]
-    }));
+  const handleValueChange = (id: string, value: any) => {
+    setFilterStates(prev => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting your dynamic 20-slider values:", filterStates);
-    //how do we turn the filter states into a database query and update accordingly
-
-    //all sessions are now unchecked?
-    //the sessions that fit the parameters are part of the sessionIds thing
-    //they are also all checked
-    //update sessions has been called
-
-    onClose();
+    onSubmitFilters(filterStates);
   };
 
   return (
@@ -148,14 +230,30 @@ export default function ParameterForm({onClose} : ParameterProps) {
       
       {/* 2. Dynamic Loop: Automatically draws sliders for all configuration criteria */}
       <div className="flex flex-col justify-center items-center">
-        {TEAMP_FILTERS.map((filter) => (
-          <ParameterSlider 
-            key={filter.id} 
-            config={filter} 
-            values={filterStates[filter.id] || [filter.minLimit, filter.maxLimit]}
-            onChange={(min, max) => handleSliderChange(filter.id, min, max)}
-          />
-        ))}
+        {TEAMP_FILTERS.map((filter) => {
+          // Dynamic Polymorphic Component Dispatching Matcher
+          if (filter.type === 'range') {
+            return (
+              <ParameterSlider
+                key={filter.id}
+                config={filter}
+                values={filterStates[filter.id]}
+                onChange={(min, max) => handleValueChange(filter.id, [min, max])}
+              />
+            );
+          }
+          if (filter.type === 'select') {
+            return (
+              <ParameterSelect
+                key={filter.id}
+                config={filter}
+                value={filterStates[filter.id] || []}
+                onChange={(newVal) => handleValueChange(filter.id, newVal)}
+              />
+            );
+          }
+          return null;
+        })}
       </div>
       
       <button 
