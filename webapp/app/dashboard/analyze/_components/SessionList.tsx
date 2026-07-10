@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import { useState } from 'react';
 import { Session } from '../page';
 import DateFormatter from '@/components/ui/dateformatter'
 
@@ -13,6 +13,26 @@ interface Props {
 
 
 export default function SessionList({ sessionList, selectedIds, onToggleSession, updateSessions}: Props) {
+
+    const [isAllSelected, setIsAllSelected] = useState(false);
+
+    const selectAllSessions = () => {
+        for(let i = 0; i < sessionList.length; i++){
+            if(!selectedIds.includes(sessionList[i].session_id)){
+                onToggleSession(sessionList[i].session_id)
+            }
+        }
+        setIsAllSelected(true);
+    }
+
+    const deselectAllSessions = () => {
+        for(let i = 0; i < sessionList.length; i++){
+            if(selectedIds.includes(sessionList[i].session_id)){
+                onToggleSession(sessionList[i].session_id)
+            }
+        }
+        setIsAllSelected(false);
+    }
 
     return (
         <div className="space-y-2">
@@ -51,7 +71,13 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
             );
             })}
 
-            <button onClick={updateSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-zinc-100">Submit Sessions</button>
+            <div className="flex justify-center items-center">
+                <button onClick={updateSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-zinc-100">Submit Sessions</button>
+
+                <button onClick={isAllSelected ? deselectAllSessions : selectAllSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-zinc-100">
+                    {isAllSelected ? 'Deselect All Sessions' : 'Select All Sessions'}
+                </button>
+            </div>
         </div>
     );
 }

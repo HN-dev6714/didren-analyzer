@@ -16,6 +16,86 @@ export interface Session {
     session_timestamp?: string;
     motion_data: MotionDataPoint[];
 
+    min_acc_x?: number;
+    min_acc_y?: number;
+    min_acc_z?: number;
+    max_acc_x?: number;
+    max_acc_y?: number;
+    max_acc_z?: number;
+    mean_acc_x?: number;
+    mean_acc_y?: number;
+    mean_acc_z?: number;
+
+    min_vel_x?: number;
+    min_vel_y?: number;
+    min_vel_z?: number;
+    max_vel_x?: number;
+    max_vel_y?: number;
+    max_vel_z?: number;
+    mean_vel_x?: number;
+    mean_vel_y?: number;
+    mean_vel_z?: number;
+
+    min_pos_x?: number;
+    min_pos_y?: number;
+    min_pos_z?: number;
+    max_pos_x?: number;
+    max_pos_y?: number;
+    max_pos_z?: number;
+    mean_pos_x?: number;
+    mean_pos_y?: number;
+    mean_pos_z?: number;
+
+    min_ang_acc_x?: number;
+    min_ang_acc_y?: number;
+    min_ang_acc_z?: number;
+    max_ang_acc_x?: number;
+    max_ang_acc_y?: number;
+    max_ang_acc_z?: number;
+    mean_ang_acc_x?: number;
+    mean_ang_acc_y?: number;
+    mean_ang_acc_z?: number;
+
+    min_ang_vel_x?: number;
+    min_ang_vel_y?: number;
+    min_ang_vel_z?: number;
+    max_ang_vel_x?: number;
+    max_ang_vel_y?: number;
+    max_ang_vel_z?: number;
+    mean_ang_vel_x?: number;
+    mean_ang_vel_y?: number;
+    mean_ang_vel_z?: number;
+
+    min_ang_x?: number;
+    min_ang_y?: number;
+    min_ang_z?: number;
+    max_ang_x?: number;
+    max_ang_y?: number;
+    max_ang_z?: number;
+    mean_ang_x?: number;
+    mean_ang_y?: number;
+    mean_ang_z?: number;
+
+    min_shoot_time?: number;
+    max_shoot_time?: number;
+    mean_shoot_time?: number;
+    min_reach_time?: number;
+    max_reach_time?: number;
+    mean_reach_time?: number;
+
+    min_center_to_left?: number;
+    max_center_to_left?: number;
+    mean_center_to_left?: number;
+    min_center_to_right?: number;
+    max_center_to_right?: number;
+    mean_center_to_right?: number;
+    min_left_to_center?: number;
+    max_left_to_center?: number;
+    mean_left_to_center?: number;
+    min_right_to_center?: number;
+    max_right_to_center?: number;
+    mean_right_to_center?: number;
+
     headsets: {
         headset_serial_number: string;
         therapist_headset_map: {
@@ -53,6 +133,11 @@ export interface MotionDataPoint {
   ang_z: number;
 }
 
+interface CohortMetric{
+    metric_name: string;
+    metric_value: number;
+}
+
 export const METRIC_OPTIONS = [
   { value: 'acc_x', label: 'Acceleration (X-Axis)' },
   { value: 'acc_y', label: 'Acceleration (Y-Axis)' },
@@ -75,22 +160,6 @@ export const METRIC_OPTIONS = [
 ] as const;
 
 export type MetricParameter = typeof METRIC_OPTIONS[number]['value'];
-/**
- * This is where the Clinician/Researcher will analyze data
- * 
- * Here are the proposed specifications:
- * - Depending on whether the role is a Clinician or a Researcher, specific data will be shown
- * (so some pieces of data such as acceleration may not be visible for Clinicians)
- * - We will fetch all headsets in the Therapist-Headset intermediary table and list all sessions possible 
- * in a...drop-down menu? A calendar?  (we already did this in a very different page. )
- * - Users can choose by session or select multiple sessions with filters. They can filter by accessible
- * patient name, patient parameters, a specific test parameter, or a set of test parameters
- * - There will be options to select what types of data will be shown. 
- * - The users will be shown a graph with data points they decide to pick out: from MotionData
- * - They will also be shown overall statistics of that session below the graph: max's and min's will have 
- * to be recalculated if multiple sessions are selected. Averages and means could be a little
- * complicated as some sessions are longer than others...we're wondering if we must weight them properly.
- */
 
 export default function AnalyzingPage() {
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -108,6 +177,20 @@ export default function AnalyzingPage() {
     const lineColors = ['#0f766e', '#4338ca', '#b45309', '#be185d', '#1d4ed8'];
 
     const [chartData, setChartData] = useState<any[]>([]);
+    const [summaryMetrics, setSummaryMetrics] = useState<CohortMetric[]>([]);
+    const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+
+    const nonMetricKeys = new Set([
+        'session_id',
+        'headset_serial_number',
+        'patient_id',
+        'config_id',
+        'session_timestamp',
+        'motion_data',
+        'headsets',
+        'patients'
+    ]);
+
 
     function generateChartData(
         sessions: Session[],
@@ -334,6 +417,38 @@ export default function AnalyzingPage() {
                     patient_id,
                     config_id,
 
+                    min_acc_x, min_acc_y, min_acc_z,
+                    max_acc_x, max_acc_y, max_acc_z,
+                    mean_acc_x, mean_acc_y, mean_acc_z,
+
+                    min_vel_x, min_vel_y, min_vel_z,
+                    max_vel_x, max_vel_y, max_vel_z,
+                    mean_vel_x, mean_vel_y, mean_vel_z,
+
+                    min_pos_x, min_pos_y, min_pos_z,
+                    max_pos_x, max_pos_y, max_pos_z,
+                    mean_pos_x, mean_pos_y, mean_pos_z,
+
+                    min_ang_acc_x, min_ang_acc_y, min_ang_acc_z,
+                    max_ang_acc_x, max_ang_acc_y, max_ang_acc_z,
+                    mean_ang_acc_x, mean_ang_acc_y, mean_ang_acc_z,
+
+                    min_ang_vel_x, min_ang_vel_y, min_ang_vel_z,
+                    max_ang_vel_x, max_ang_vel_y, max_ang_vel_z,
+                    mean_ang_vel_x, mean_ang_vel_y, mean_ang_vel_z,
+
+                    min_ang_x, min_ang_y, min_ang_z,
+                    max_ang_x, max_ang_y, max_ang_z,
+                    mean_ang_x, mean_ang_y, mean_ang_z,
+
+                    min_shoot_time, max_shoot_time, mean_shoot_time,
+                    min_reach_time, max_reach_time, mean_reach_time,
+
+                    min_center_to_left, max_center_to_left, mean_center_to_left,
+                    min_center_to_right, max_center_to_right, mean_center_to_right,
+                    min_left_to_center, max_left_to_center, mean_left_to_center,
+                    min_right_to_center, max_right_to_center, mean_right_to_center,
+
                     patients (
                         first_name,
                         surname
@@ -358,29 +473,37 @@ export default function AnalyzingPage() {
                 if (fetchError) throw fetchError;
 
                 // Cast our data over to our state hook array
-                const parsedList: Session[] = (sessionList || []).map((row: any) => ({
+                const parsedList: Session[] = (sessionList || []).map((row: any) => {
+                // 1. Pull out the relational sub-objects; everything left in 'metrics' are the flat database columns
+                const { headsets, patients, motion_data, ...metrics } = row;
+
+                return {
+                    // 2. Spread the top-level keys (session_id, timestamps, and all your 60+ new min/max/mean metrics)
+                    ...metrics,
+                    
                     session_id: row.session_id,
                     headset_serial_number: row.headset_serial_number,
                     patient_id: row.patient_id,
                     config_id: row.config_id,
                     session_timestamp: row.session_timestamp,
-                    motion_data: row.motion_data || [],
+                    motion_data: motion_data || [],
                     
-                    headsets: row.headsets
-                    ? {
-                        headset_serial_number: row.headsets.headset_serial_number,
-                        therapist_headset_map: row.headsets.therapist_headset_map || []
-                    }
-                    : null,
-
-                    patients: row.patients 
+                    // 3. Map your relations with safe fallbacks
+                    headsets: headsets
                         ? {
-                            first_name: row.patients.first_name,
-                            surname: row.patients.surname,
-                            therapist_headset_map: row.patients.therapist_headset_map || []
+                            headset_serial_number: headsets.headset_serial_number,
+                            therapist_headset_map: headsets.therapist_headset_map || []
+                        }
+                        : null,
+
+                    patients: patients 
+                        ? {
+                            first_name: patients.first_name,
+                            surname: patients.surname
                         }
                         : null
-                }));
+                };
+            });
 
                 setSessions(parsedList);
 
@@ -394,6 +517,33 @@ export default function AnalyzingPage() {
 
         retrieveSessions();
     }, []); // Added the empty dependency array to prevent the infinite loop!
+
+    useEffect(() => {
+        const fetchCohortSummary = async () => {
+            if (!selectedSessionIds || selectedSessionIds.length === 0) {
+            setSummaryMetrics([]);
+            return;
+            }
+
+            setIsLoadingSummary(true);
+            try {
+            // Directly execute your custom Postgres math engine block
+            const { data, error } = await supabase
+                .rpc('get_cohort_summary', { 
+                target_session_ids: selectedSessionIds 
+                });
+
+            if (error) throw error;
+            setSummaryMetrics(data || []);
+            } catch (err) {
+            console.error("Failed fetching database summary tracking matrix:", err);
+            } finally {
+            setIsLoadingSummary(false);
+            }
+        };
+
+        fetchCohortSummary();
+    }, [selectedSessionIds]);
 
     if (isLoading) return <div className="justify-center items-center text-center mx-auto">Loading diagnostic metrics...</div>;
     if (errorMessage) return <div>Error! {errorMessage}</div>;
@@ -468,9 +618,9 @@ export default function AnalyzingPage() {
                                 chartData.length > 0 && (
                                     <Line
                                     type="monotone"
-                                    dataKey="average"           // Pulls from dataRow.average
-                                    stroke="#be123c"             // Distinct deep rose color
-                                    strokeWidth={3}              // Solid presence
+                                    dataKey="average" 
+                                    stroke="#be123c"    
+                                    strokeWidth={3}  
                                     name="Average Line"
                                     dot={false}
                                     />
@@ -500,33 +650,27 @@ export default function AnalyzingPage() {
                 </button>
             </div>
             <div className="flex flex-col w-full justify-center items-center">
-                <h2 className="text-center text-3xl font-bold">
+                <h2 className="text-center text-3xl font-bold mb-10">
                     Overall Statistics:
                 </h2>
-                <div className="flex w-160 gap-48 bg-zinc-200">
-                    <div className="flex flex-col">
-                        <p className="text-base">
-                            Stat: 1
+                {isLoadingSummary ? (
+                    <p className="text-xs text-zinc-400 italic text-center py-4">Calculating data balances...</p>
+                ) : summaryMetrics.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-x-24 w-200 gap-y-6">
+                    {summaryMetrics.map((item) => (
+                        <p key={item.metric_name} className="text-xs text-zinc-600 flex justify-between border-b border-zinc-100 py-1">
+                        <span className="font-medium text-zinc-500 capitalize">
+                            {item.metric_name.replace(/_/g, ' ')}:
+                        </span>
+                        <span className="font-mono font-semibold text-zinc-900">
+                            {item.metric_value !== null ? item.metric_value.toFixed(3) : "N/A"}
+                        </span>
                         </p>
-                        <p className="text-base">
-                            Stat: 2
-                        </p>
-                        <p className="text-base">
-                            Stat: 3
-                        </p>
+                    ))}
                     </div>
-                    <div className="flex flex-col">
-                        <p className="text-base">
-                            Stat: 1
-                        </p>
-                        <p className="text-base">
-                            Stat: 2
-                        </p>
-                        <p className="text-base">
-                            Stat: 3
-                        </p>
-                    </div>
-                </div>
+                ) : (
+                    <p className="text-xs text-zinc-400 italic text-center py-4">No data sessions selected</p>
+                )}
             </div>
         </div>
     )

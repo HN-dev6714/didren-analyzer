@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-export type FilterType = 'range' | 'select' | 'boolean';
+export type FilterType = 'range' | 'select' ;
 
 export interface BaseFilterConfig {
   id: string;

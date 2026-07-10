@@ -109,7 +109,7 @@ export default function TestingPage(){
                         <p className="text-sm">Stat 10:</p>
                         <p className="text-sm">Stat 11:</p>
                         <p className="text-sm">Stat 12:</p>
-                        <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-800 text-white rounded">Test connection to web socket</button>
+                        <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-800 text-white rounded">Submit (Test Connection to Web Socket)</button>
                     </div>
                     <div className="">
                         <h2 className="text-center font-bold text-2xl text-zinc-700 mb-4">
