@@ -10,6 +10,7 @@ export function AddHeadsetForm() {
     const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | null, text: string}>({ type: null, text: ''});
     const [isLoading, setIsLoading] = useState(false);
     const { addDevice } = useDevices();
+    const [headsetName, setHeadsetName] = useState('');
 
     const supabase = createClient();
 
@@ -83,7 +84,8 @@ export function AddHeadsetForm() {
             addDevice({
                 headset_serial: validCodeEntry.headset_serial,
                 code: 'PAIRED',
-                expiration: 'Permanent'
+                expiration: 'Permanent',
+                nickname: headsetName
             });
             
             await supabase
@@ -91,6 +93,7 @@ export function AddHeadsetForm() {
                 .delete()
                 .eq('code', pinInput);
 
+            //success! Please, type in headset name
             setStatusMessage({ type: 'success', text: 'Headset successfully paired and stored!'});
             setPinInput('');
 
@@ -123,6 +126,19 @@ export function AddHeadsetForm() {
                 disabled = {isLoading}
                 onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
                 className="text-zinc-900 h-10 bg-zinc-200 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest uppercase text-center font-mono focus:outline-none focus:border-teal-500"
+            />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-zinc-700">Headset Name</label>
+            <input 
+                type="text" 
+                placeholder="E.G. Headset 1" 
+                maxLength={30}
+                value = {headsetName}
+                disabled = {isLoading}
+                onChange={(e) => setHeadsetName(e.target.value)}
+                className="text-zinc-900 h-10 bg-zinc-200 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest text-center font-mono focus:outline-none focus:border-teal-500"
             />
         </div>
 
