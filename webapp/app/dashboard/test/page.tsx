@@ -176,7 +176,7 @@ export default function TestingPage(){
                         Add Headset
                     </Link>
                 </div>
-                <div className="flex justify-center items-center gap-12">
+                <div className="flex justify-center items-center gap-12 w-300">
                     <div className="flex-1">
                         <PayloadComponent title="Patient Data" payload={formPatientData} />
                         <PayloadComponent title="Test Settings Data" payload={formSettingsData} />

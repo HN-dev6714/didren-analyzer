@@ -18,12 +18,12 @@ export default function StructuralMetricViewer({ title, payload }: MetricViewerP
   }
 
   return (
-    <div className="p-5 space-y-2">
-      <h3 className="text-sm font-bold text-zinc-800 border-b border-zinc-100 pb-2 mb-3">
+    <div className="p-3 space-y-2">
+      <h3 className="text-sm font-bold text-zinc-800 border-b border-zinc-100 pb-2">
         {title}
       </h3>
       
-      <div className="space-y-1">
+      <div>
         {Object.entries(payload).map(([key, value]) => {
           
           let displayValue = String(value);
