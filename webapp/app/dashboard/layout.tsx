@@ -24,16 +24,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/")
   }
 
-  // User is valid! Render the internal application layout
   return (
-    <div className="flex h-screen justify-center bg-zinc-100 text-zinc-800">
+    <div className="flex min-h-screen w-full relative justify-center bg-zinc-100 dark:bg-zinc-900 text-zinc-300 dark:text-zinc-700" 
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, currentColor 1px, transparent 1px),
+                linear-gradient(to bottom, currentColor 1px, transparent 1px)
+              `,
+              backgroundSize: "40px 40px",
+            }}>
       <main className="flex-1 flex flex-col min-h-full overflow-y-auto p-10">
         {children}
-
-        <div className="absolute bottom-6 left-6 text-xs text-zinc-800 pt-6">
+        <div className="absolute bottom-6 left-6 text-xs text-zinc-800 dark:text-zinc-100 pt-6">
           Logged in as:<br/>{user.email}
         </div>
       </main>
     </div>
+    
   )
 }

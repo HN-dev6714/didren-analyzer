@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SocketProvider } from "./context/SocketContext"
 import { DeviceProvider } from "./context/DeviceContext"
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,14 +28,16 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en" suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-[family-name:var(--font-geist-sans)]">
         <SocketProvider>
-          <DeviceProvider>
-            {children}
-          </DeviceProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <DeviceProvider>
+              {children}
+            </DeviceProvider>
+          </ThemeProvider>
         </SocketProvider>
       </body>
     </html>

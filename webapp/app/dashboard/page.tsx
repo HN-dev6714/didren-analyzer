@@ -5,21 +5,25 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Link from "next/link"
+import { ThemeToggle } from '@/components/ui/themeButton';
 
 export default function DashboardOverviewPage() {
   return (
     <div className="relative flex flex-col w-full h-screen justify-start items-center p-6">
       <Link href="/">
-        <button className="absolute top-8 right-8 bg-zinc-800 text-zinc-100 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
+        <button className="absolute top-8 left-8 bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-800 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
           Log Out
         </button>
       </Link>
+      <div className="absolute top-8 right-8">
+        <ThemeToggle/>
+      </div>
 
       <div className="flex flex-col justify-center items-center mb-12">
-        <h1 className="text-6xl font-bold text-teal-700 tracking-tight mb-4 text-center">
+        <h1 className="text-6xl font-bold text-teal-700 dark:text-teal-300 tracking-tight mb-4 text-center">
           DidRen Analyzer
         </h1>
-        <h2 className="text-zinc-600 font-bold text-2xl text-center">
+        <h2 className="text-zinc-600 dark:text-zinc-300 font-bold text-2xl text-center">
           Welcome
         </h2>
       </div>

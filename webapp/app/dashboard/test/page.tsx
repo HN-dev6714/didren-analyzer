@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useDevices } from '@/app/context/DeviceContext';
 import PayloadComponent from './payload'
+import { ThemeToggle } from '@/components/ui/themeButton';
 
 
 interface DeviceCode {
@@ -151,18 +152,21 @@ export default function TestingPage(){
         <div>
             <div className="flex flex-col justify-center items-center w-full">
                 <Link href="/dashboard">
-                    <button className="absolute top-8 left-8 bg-zinc-800 text-zinc-100 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                    <button className="absolute top-8 left-8 bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-900 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-300 transition-colors">
                         Return
                     </button>
                 </Link>
-                <h1 className="text-center text-zinc-700 text-4xl font-bold mb-12">
+                <div className="absolute top-8 right-8">
+                    <ThemeToggle />
+                </div>
+                <h1 className="text-center text-zinc-700 dark:text-zinc-100 text-4xl font-bold mb-12">
                     Testing Application
                 </h1>
                 <div className="flex justify-center mb-12 gap-8">
-                    <h1 className="text-zinc-700 text-2xl font-bold">
+                    <h1 className="text-zinc-700 dark:text-zinc-100 text-2xl font-bold">
                         Select Headset:
                     </h1>
-                    <select>
+                    <select className="w-50 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 bg-white dark:bg-black rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500">
                         {devices.map((device) => (
                             <option key={device.headset_serial} value={device.headset_serial}>
                                 Headset ({device.headset_serial.substring(0, 8)})
@@ -176,45 +180,32 @@ export default function TestingPage(){
                         Add Headset
                     </Link>
                 </div>
-                <div className="flex justify-center items-center gap-12 w-300">
-                    <div className="flex-1">
-                        <PayloadComponent title="Patient Data" payload={formPatientData} />
-                        <PayloadComponent title="Test Settings Data" payload={formSettingsData} />
-                    </div>
-                    <div className="flex-1">
-                        <h2 className="text-center font-bold text-2xl text-zinc-700 mb-4">
-                            Headset Live Feed
-                        </h2>
-                        <canvas className="bg-zinc-700 w-192 h-128">
-
-                        </canvas>
-                    </div>
-                </div>
-                <div className="flex flex-col px-12 w-160 gap-4 mt-8">
-                        <h3 className="text-center text-2xl font-bold underline">
-                            Set Patient and Test Information on Headset:
+                <div className="flex justify-center items-center gap-12 w-full">
+                    <div className="flex flex-col px-12 w-1/3 gap-4 mt-8">
+                        <h3 className="text-center text-2xl font-bold underline text-zinc-700 dark:text-zinc-300">
+                            Send Patient and Test Information to Headset:
                         </h3>
-                        <div className="grid grid-cols-2 justify-center items-center gap-8">
+                        <div className="grid grid-cols-2 justify-center gap-8">
                             <div className="flex flex-col gap-4">
-                                <p className="text-base font-bold underline">Patient Data: </p>
+                                <p className="text-base font-bold text-zinc-700 dark:text-zinc-300">Patient Data: </p>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">First Name</label>
+                                    <label className="form-label">First Name</label>
                                     <input 
-                                        type="text" required className="w-full px-3 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        type="text" required className="form-input"
                                         value={formPatientData.first_name} onChange={e => setFormPatientData({ ...formPatientData, first_name: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Surname</label>
+                                    <label className="form-label">Surname</label>
                                     <input 
-                                        type="text" required className="w-full px-3 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        type="text" required className="form-input"
                                         value={formPatientData.surname} onChange={e => setFormPatientData({ ...formPatientData, surname: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                <label className="block text-xs font-semibold text-zinc-600 mb-1">Sex</label>
+                                <label className="form-label">Sex</label>
                                     <select 
-                                        className="w-full px-3 py-1.5 text-sm border border-zinc-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        className="form-input"
                                         value={formPatientData.sex} onChange={e => setFormPatientData({ ...formPatientData, sex: e.target.value })}
                                     >
                                         <option value="Male">Male</option>
@@ -223,9 +214,9 @@ export default function TestingPage(){
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Language</label>
+                                    <label className="form-label">Language</label>
                                     <select 
-                                        className="w-full px-3 py-1.5 text-sm border border-zinc-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        className="form-input"
                                         value={formPatientData.language} onChange={e => setFormPatientData({ ...formPatientData, language: e.target.value })}
                                     >
                                         <option value="English">EN</option>
@@ -234,106 +225,35 @@ export default function TestingPage(){
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Age</label>
+                                    <label className="form-label">Age</label>
                                     <input 
-                                        type="number" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        type="number" className="form-input"
                                         value={formPatientData.age} onChange={e => setFormPatientData({ ...formPatientData, age: parseInt(e.target.value) || 0 })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Height (cm)</label>
+                                    <label className="form-label">Height (cm)</label>
                                     <input 
-                                        type="number" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        type="number" className="form-input"
                                         value={formPatientData.height} onChange={e => setFormPatientData({ ...formPatientData, height: parseFloat(e.target.value) || 0 })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Weight (kg)</label>
+                                    <label className="form-label">Weight (kg)</label>
                                     <input 
-                                        type="number" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                                        type="number" className="form-input"
                                         value={formPatientData.weight} onChange={e => setFormPatientData({ ...formPatientData, weight: parseFloat(e.target.value) || 0 })}
                                     />
                                 </div>
-                            </div>
-                            <div className="flex flex-col gap-4">
-                                <p className="text-base font-bold underline">Test Parameters: </p>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Test Type</label>
-                                    <select 
-                                    className="w-full px-3 py-1.5 text-sm border border-zinc-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                    value={formSettingsData.test_name} onChange={e => setFormSettingsData({ ...formSettingsData, test_name: e.target.value })}
-                                    >
-                                        <option value="Horizontal">Horizontal</option>
-                                        <option value="Vertical">Vertical</option>
-                                        <option value="Diagonal Left">Diagonal Left</option>
-                                        <option value="Diagonal Right">Diagonal Right</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Angle (°)</label>
-                                    <input 
-                                        type="number" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.angle} onChange={e => setFormSettingsData({ ...formSettingsData, angle: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Distance</label>
-                                    <input 
-                                        type="number" step="0.1" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.distance} onChange={e => setFormSettingsData({ ...formSettingsData, distance: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Acc Threshold</label>
-                                    <input 
-                                        type="number" step="0.01" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.accuracy} onChange={e => setFormSettingsData({ ...formSettingsData, accuracy: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Radius Ring</label>
-                                    <input 
-                                        type="number" step="0.1" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.radius} onChange={e => setFormSettingsData({ ...formSettingsData, radius: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Target Height</label>
-                                    <input 
-                                        type="number" step="0.1" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.target_height} onChange={e => setFormSettingsData({ ...formSettingsData, target_height: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Target Size</label>
-                                    <input 
-                                        type="number" step="0.1" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.size} onChange={e => setFormSettingsData({ ...formSettingsData, size: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Total Cycles</label>
-                                    <input 
-                                        type="number" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.cycles} onChange={e => setFormSettingsData({ ...formSettingsData, cycles: parseInt(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-zinc-600 mb-1">Validation (s)</label>
-                                    <input 
-                                        type="number" step="0.1" className="w-full px-2 py-1.5 text-sm border border-zinc-300 bg-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                                        value={formSettingsData.validation_time} onChange={e => setFormSettingsData({ ...formSettingsData, validation_time: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </div>
-                                <div className="flex gap-6 pt-2 border-t border-zinc-100">
-                                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-600">
+                                <div className="flex gap-6 pt-2">
+                                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-600 dark:text-zinc-200">
                                     <input 
                                         type="checkbox" className="h-4 w-4 bg-white rounded-sm border-zinc-300 text-teal-600 accent-teal-600"
                                         checked={formSettingsData.test_audio} onChange={e => setFormSettingsData({ ...formSettingsData, test_audio: e.target.checked })}
                                     />
                                     Enable Sound Assets
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-600">
+                                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-600 dark:text-zinc-200">
                                     <input 
                                         type="checkbox" className="h-4 w-4 bg-white rounded-sm border-zinc-300 text-teal-600 accent-teal-600"
                                         checked={formSettingsData.cursor_trail} onChange={e => setFormSettingsData({ ...formSettingsData, cursor_trail: e.target.checked })}
@@ -342,9 +262,97 @@ export default function TestingPage(){
                                     </label>
                                 </div>
                             </div>
+                            <div className="flex flex-col gap-4">
+                                <p className="text-base font-bold text-zinc-700 dark:text-zinc-300">Test Parameters: </p>
+                                <div>
+                                    <label className="form-label">Test Type</label>
+                                    <select 
+                                    className="form-input"
+                                    value={formSettingsData.test_name} onChange={e => setFormSettingsData({ ...formSettingsData, test_name: e.target.value })}
+                                    >
+                                        <option value="Horizontal">Horizontal</option>
+                                        <option value="Vertical">Vertical</option>
+                                        <option value="Diagonal Left">Diagonal Left</option>
+                                        <option value="Diagonal Right">Diagonal Right</option>
+                                        <option value="Triangle Left">Triangle Left</option>
+                                        <option value="Triangle Right">Triangle Right</option>
+                                        <option value="Triangle Up">Triangle Up</option>
+                                        <option value="Triangle Down">Triangle Down</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="form-label">Angle (°)</label>
+                                    <input 
+                                        type="number" className="form-input"
+                                        value={formSettingsData.angle} onChange={e => setFormSettingsData({ ...formSettingsData, angle: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Distance</label>
+                                    <input 
+                                        type="number" step="0.1" className="form-input"
+                                        value={formSettingsData.distance} onChange={e => setFormSettingsData({ ...formSettingsData, distance: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Acc Threshold</label>
+                                    <input 
+                                        type="number" step="0.01" className="form-input"
+                                        value={formSettingsData.accuracy} onChange={e => setFormSettingsData({ ...formSettingsData, accuracy: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Radius Ring</label>
+                                    <input 
+                                        type="number" step="0.1" className="form-input"
+                                        value={formSettingsData.radius} onChange={e => setFormSettingsData({ ...formSettingsData, radius: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Target Height</label>
+                                    <input 
+                                        type="number" step="0.1" className="form-input"
+                                        value={formSettingsData.target_height} onChange={e => setFormSettingsData({ ...formSettingsData, target_height: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Target Size</label>
+                                    <input 
+                                        type="number" step="0.1" className="form-input"
+                                        value={formSettingsData.size} onChange={e => setFormSettingsData({ ...formSettingsData, size: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Total Cycles</label>
+                                    <input 
+                                        type="number" className="form-input"
+                                        value={formSettingsData.cycles} onChange={e => setFormSettingsData({ ...formSettingsData, cycles: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Validation (s)</label>
+                                    <input 
+                                        type="number" step="0.1" className="form-input"
+                                        value={formSettingsData.validation_time} onChange={e => setFormSettingsData({ ...formSettingsData, validation_time: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-800 text-white rounded">Submit (Test Connection to Web Socket)</button>
                     </div>
+                    <div className="flex-1">
+                        <h2 className="text-center font-bold text-2xl text-zinc-700 dark:text-zinc-100 mb-4">
+                            Headset Live Feed
+                        </h2>
+                        <canvas className="bg-zinc-700 w-196 h-128">
+
+                        </canvas>
+                    </div>
+                    <div className="flex-1">
+                        <PayloadComponent title="Patient Data" payload={formPatientData} />
+                        <PayloadComponent title="Test Settings Data" payload={formSettingsData} />
+                    </div>
+                </div>
             </div>
         </div>
     )

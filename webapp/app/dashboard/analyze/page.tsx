@@ -6,6 +6,8 @@ import { createClient } from '@/utils/supabase/client';
 import AnalysisModal from './_components/AnalysisModal';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TEAMP_FILTERS }from './_components/ParameterForm';
+import { ThemeToggle } from '@/components/ui/themeButton';
+import { useTheme } from "next-themes";
 
 
 export interface Session {
@@ -174,7 +176,18 @@ export default function AnalyzingPage() {
     const [isAverage, setIsAverage] = useState<boolean>(false);
 
     const [activeParameter, setActiveParameter] = useState<MetricParameter>('acc_x');
-    const lineColors = ['#0f766e', '#4338ca', '#b45309', '#be185d', '#1d4ed8'];
+
+    const { resolvedTheme } = useTheme(); // 'resolvedTheme' handles 'system' mode cleanly
+    const [mounted, setMounted] = useState(false);
+
+    const isDark = mounted && resolvedTheme === "dark";
+    const lineColors = isDark
+    ? ["#2dd4bf", "#f43f5e", "#fbbf24", "#a855f7", "#38bdf8"] 
+    : ["#0d9488", "#be123c", "#d97706", "#7e22ce", "#0284c7"];
+
+    const gridColor = isDark ? "#27272a" : "#f4f4f5"; 
+    const axisColor = isDark ? "#f4f4f5" : "#27272a"; 
+    const avgLineColor = isDark ? "#f43f5e" : "#be123c";
 
     const [chartData, setChartData] = useState<any[]>([]);
     const [summaryMetrics, setSummaryMetrics] = useState<CohortMetric[]>([]);
@@ -545,6 +558,10 @@ export default function AnalyzingPage() {
         fetchCohortSummary();
     }, [selectedSessionIds]);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     if (isLoading) return <div className="justify-center items-center text-center mx-auto">Loading diagnostic metrics...</div>;
     if (errorMessage) return <div>Error! {errorMessage}</div>;
 
@@ -553,16 +570,19 @@ export default function AnalyzingPage() {
         <div className="flex flex-col">
             <div className="justify-center items-center mb-10">
                 <Link href="/dashboard">
-                    <button className="bg-zinc-800 text-zinc-100 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                    <button className="bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-900 flex items-center justify-center rounded-md h-8 px-3 text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-300 transition-colors">
                         Return
                     </button>
                 </Link>
-                <h1 className="text-center text-zinc-700 text-5xl font-bold">
+                <div className="absolute top-8 right-8">
+                    <ThemeToggle />
+                </div>
+                <h1 className="text-center text-zinc-700 dark:text-zinc-100 text-5xl font-bold">
                     Analyzer Application
                 </h1>
             </div>
             <div className="flex flex-col gap-4 mx-auto w-full ">
-                <h2 className="text-center font-bold text-xl justify-center items-center mx-auto text-zinc-800 mb-2">
+                <h2 className="text-center font-bold text-xl justify-center items-center mx-auto text-zinc-800 dark:text-zinc-100 mb-2">
                     Graph Filters
                 </h2>
                 
@@ -575,7 +595,7 @@ export default function AnalyzingPage() {
                                 setActiveParameter(nextParam);                            
                                 handleSubmitSelection(nextParam);
                             }}
-                            className="justify-center p-2 items-center mx-auto border border-zinc-200 rounded-lg bg-white text-sm text-zinc-700 font-medium focus:ring-2 focus:ring-teal-500 outline-none"
+                            className="form-input"
                             >
                             {METRIC_OPTIONS.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -606,71 +626,80 @@ export default function AnalyzingPage() {
                 />                   
             </div>
             <div className="flex w-full justify-center items-center">
-                <div className="w-256 h-128 mt-8 mb-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                            <XAxis dataKey="timestamp" stroke="#a1a1aa" fontSize={11} />
-                            <YAxis stroke="#a1a1aa" fontSize={11} />
-                            <Tooltip />
-                            <Legend />
-                            {isAverage ? (
-                                chartData.length > 0 && (
-                                    <Line
-                                    type="monotone"
-                                    dataKey="average" 
-                                    stroke="#be123c"    
-                                    strokeWidth={3}  
-                                    name="Average Line"
-                                    dot={false}
-                                    />
-                                )
-                            ) : (
-                                sessions
-                                .filter(s => selectedSessionIds.includes(s.session_id))
-                                .map((session, idx) => (
-                                    <Line
-                                    key={session.session_id}
-                                    type="monotone"
-                                    dataKey={session.session_id} // Points directly to the key path inside chartData
-                                    name={session.patients?.first_name || `Session ${session.session_id.slice(0,4)}`} // Clean Legend Labels
-                                    stroke={lineColors[idx % lineColors.length]}
-                                    strokeWidth={2}
-                                    dot={false} // Hides cluttering coordinate anchor dots for smoother presentation
-                                    />
-                                ))
-                            )}
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-            <div className="flex justify-center items-center mb-10">
-                <button onClick={() => setIsAverage(!isAverage)} className="rounded h-8 w-64 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700">
-                   {isAverage ? 'Reset to Individual Sessions' : 'Average All Selected Sessions'}
-                </button>
-            </div>
-            <div className="flex flex-col w-full justify-center items-center">
-                <h2 className="text-center text-3xl font-bold mb-10">
-                    Overall Statistics:
-                </h2>
-                {isLoadingSummary ? (
-                    <p className="text-xs text-zinc-400 italic text-center py-4">Calculating data balances...</p>
-                ) : summaryMetrics.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-x-24 w-200 gap-y-6">
-                    {summaryMetrics.map((item) => (
-                        <p key={item.metric_name} className="text-xs text-zinc-600 flex justify-between border-b border-zinc-100 py-1">
-                        <span className="font-medium text-zinc-500 capitalize">
-                            {item.metric_name.replace(/_/g, ' ')}:
-                        </span>
-                        <span className="font-mono font-semibold text-zinc-900">
-                            {item.metric_value !== null ? item.metric_value.toFixed(3) : "N/A"}
-                        </span>
-                        </p>
-                    ))}
+                <div className="">
+                    <div className="w-256 h-128 mt-8 mb-4">
+                        <ResponsiveContainer key={resolvedTheme} width="100%" height="100%">
+                            <LineChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                <XAxis dataKey="timestamp" stroke={axisColor} fontSize={11} />
+                                <YAxis stroke={axisColor} fontSize={11} />
+                                <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: isDark ? "#18181b" : "#ffffff",
+                                        borderColor: isDark ? "#27272a" : "#e4e4e7",
+                                        color: isDark ? "#f4f4f5" : "#18181b",
+                                        borderRadius: "0.375rem"
+                                    }}
+                                />
+                                <Legend wrapperStyle={{ color: isDark ? "#f4f4f5" : "#18181b" }} />
+                                {isAverage ? (
+                                    chartData.length > 0 && (
+                                        <Line
+                                        type="monotone"
+                                        dataKey="average" 
+                                        stroke={avgLineColor}    
+                                        strokeWidth={3}  
+                                        name="Average Line"
+                                        dot={false}
+                                        />
+                                    )
+                                ) : (
+                                    sessions
+                                    .filter(s => selectedSessionIds.includes(s.session_id))
+                                    .map((session, idx) => (
+                                        <Line
+                                        key={session.session_id}
+                                        type="monotone"
+                                        dataKey={session.session_id} // Points directly to the key path inside chartData
+                                        name={session.patients?.first_name || `Session ${session.session_id.slice(0,4)}`} // Clean Legend Labels
+                                        stroke={lineColors[idx % lineColors.length]}
+                                        strokeWidth={2}
+                                        dot={false} // Hides cluttering coordinate anchor dots for smoother presentation
+                                        />
+                                    ))
+                                )}
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
-                ) : (
-                    <p className="text-xs text-zinc-400 italic text-center py-4">No data sessions selected</p>
-                )}
+                    <div className="flex justify-center items-center mb-10">
+                        <button onClick={() => setIsAverage(!isAverage)} className="rounded h-8 w-64 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700">
+                        {isAverage ? 'Reset to Individual Sessions' : 'Average All Selected Sessions'}
+                        </button>
+                    </div>
+                </div>
+                <div className="flex flex-col w-full justify-center items-center">
+                    <h2 className="text-center text-zinc-700 dark:text-zinc-100 text-3xl font-bold mb-4 underline">
+                        Overall Statistics:
+                    </h2>
+                    {isLoadingSummary ? (
+                        <p className="text-xs text-zinc-400 dark:text-zinc-100 italic text-center py-4">Calculating data balances...</p>
+                    ) : summaryMetrics.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-x-24 w-200 gap-y-1">
+                        {summaryMetrics.map((item) => (
+                            <p key={item.metric_name} className="text-xs text-zinc-600 dark:text-zinc-100 flex justify-between py-1">
+                            <span className="font-medium text-zinc-500 dark:text-zinc-100 capitalize">
+                                {item.metric_name.replace(/_/g, ' ')}:
+                            </span>
+                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
+                                {item.metric_value !== null ? item.metric_value.toFixed(3) : "N/A"}
+                            </span>
+                            </p>
+                        ))}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-zinc-400 dark:text-zinc-100 text-center py-4">No data sessions selected</p>
+                    )}
+                </div>
             </div>
         </div>
     )
