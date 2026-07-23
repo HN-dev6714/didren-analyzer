@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Link from "next/link"
 import { ThemeToggle } from '@/components/ui/themeButton';
+import MagnifyingGlassIcon from '@/public/images/MagnifyingGlassIcon.svg';
+import TargetIcon from '@/public/images/TargetIcon.svg';
 
 export default function DashboardOverviewPage() {
   return (
@@ -33,9 +35,7 @@ export default function DashboardOverviewPage() {
         <Link className="h-full w-4/5 block" href="/dashboard/test">
           <Card className="h-full w-full">
             <CardContent className="flex flex-col h-full justify-center items-center p-8">
-              <div className="relative flex w-full h-3/4 justify-center items-center">
-                <Image src="/images/TargetIcon.svg" alt="TargetLogo" fill/>
-              </div>
+              <TargetIcon className="w-full h-full h-3/4 dark:text-teal-400 text-teal-600" />
               <h2 className="mt-auto text-3xl font-bold text-center">
                 Test
               </h2>
@@ -46,9 +46,7 @@ export default function DashboardOverviewPage() {
         <Link className="h-full w-4/5 block" href="/dashboard/analyze">
           <Card className="h-full w-full">
             <CardContent className="flex flex-col h-full justify-center items-center p-8">
-              <div className="relative flex w-full h-3/4 justify-center items-center">
-                <Image src="/images/MagnifyingGlassIcon.svg" alt="TargetLogo" fill />
-              </div>
+              <MagnifyingGlassIcon className="w-full h-full h-3/4 dark:text-teal-400 text-teal-600" />
               <h2 className="mt-auto text-3xl font-bold text-center">
                 Analyze
               </h2>

@@ -22,5 +22,5 @@ export default function DateFormatter({ isoString, showTime = false }: DateForma
     ...(showTime && { hour: 'numeric', minute: '2-digit', hour12: true })
   });
 
-  return <span className="text-zinc-700 font-medium">{formatted}</span>;
+  return <span className="text-zinc-700 dark:text-zinc-100 font-medium">{formatted}</span>;
 }

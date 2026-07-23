@@ -36,7 +36,7 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
 
     return (
         <div className="space-y-2">
-            <h2 className="text-sm font-bold text-zinc-700 mb-2 text-center">Select Sessions:</h2>
+            <h2 className="text-sm font-bold text-zinc-700 dark:text-zinc-100 mb-2 text-center">Select Sessions:</h2>
             
             {sessionList.map((session) => {
             // Check if this specific item is inside the active selection array
@@ -49,8 +49,8 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
                 onClick={() => onToggleSession(session.session_id)} 
                 className={`w-full p-4 rounded-xl border text-left transition-all flex justify-between items-center ${
                     isSelected
-                    ? 'border-teal-600 bg-teal-50/50 shadow-sm ring-1 ring-teal-600'
-                    : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                    ? 'border-teal-600 bg-teal-50/50 shadow-sm ring-1 ring-teal-600 text-zinc-200'
+                    : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-black hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-50'
                 }`}
                 >
                 <div>
@@ -72,9 +72,9 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
             })}
 
             <div className="flex justify-center items-center">
-                <button onClick={updateSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-zinc-100">Submit Sessions</button>
+                <button onClick={updateSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-teal-700 bg-teal-600 dark:text-zinc-100 text-zinc-700">Submit Sessions</button>
 
-                <button onClick={isAllSelected ? deselectAllSessions : selectAllSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-zinc-100">
+                <button onClick={isAllSelected ? deselectAllSessions : selectAllSessions} className="flex justify-center items-center text-center rounded h-8 w-48 border border-teal-600 mx-auto hover:bg-teal-700 bg-teal-600 dark:text-zinc-100 text-zinc-700">
                     {isAllSelected ? 'Deselect All Sessions' : 'Select All Sessions'}
                 </button>
             </div>

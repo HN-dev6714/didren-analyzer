@@ -8,6 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { TEAMP_FILTERS }from './_components/ParameterForm';
 import { ThemeToggle } from '@/components/ui/themeButton';
 import { useTheme } from "next-themes";
+import { Card } from "@/components/ui/card";
 
 
 export interface Session {
@@ -626,8 +627,8 @@ export default function AnalyzingPage() {
                 />                   
             </div>
             <div className="flex w-full justify-center items-center">
-                <div className="">
-                    <div className="w-256 h-128 mt-8 mb-4">
+                <Card className="bg-white dark:bg-black w-full p-6 mt-4">
+                    <div className="w-256 h-128 mt-8 mb-4 pr-10">
                         <ResponsiveContainer key={resolvedTheme} width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
@@ -671,35 +672,37 @@ export default function AnalyzingPage() {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="flex justify-center items-center mb-10">
+                    <div className="flex justify-center items-center mb-8">
                         <button onClick={() => setIsAverage(!isAverage)} className="rounded h-8 w-64 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700">
                         {isAverage ? 'Reset to Individual Sessions' : 'Average All Selected Sessions'}
                         </button>
                     </div>
-                </div>
-                <div className="flex flex-col w-full justify-center items-center">
-                    <h2 className="text-center text-zinc-700 dark:text-zinc-100 text-3xl font-bold mb-4 underline">
-                        Overall Statistics:
-                    </h2>
-                    {isLoadingSummary ? (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-100 italic text-center py-4">Calculating data balances...</p>
-                    ) : summaryMetrics.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-x-24 w-200 gap-y-1">
-                        {summaryMetrics.map((item) => (
-                            <p key={item.metric_name} className="text-xs text-zinc-600 dark:text-zinc-100 flex justify-between py-1">
-                            <span className="font-medium text-zinc-500 dark:text-zinc-100 capitalize">
-                                {item.metric_name.replace(/_/g, ' ')}:
-                            </span>
-                            <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                                {item.metric_value !== null ? item.metric_value.toFixed(3) : "N/A"}
-                            </span>
-                            </p>
-                        ))}
-                        </div>
-                    ) : (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-100 text-center py-4">No data sessions selected</p>
-                    )}
-                </div>
+                </Card>
+                    <div className="flex flex-col w-full justify-center items-center">
+                        <Card className="bg-white dark:bg-black p-6 mt-6">
+                            <h2 className="text-center text-zinc-700 dark:text-zinc-100 text-3xl font-bold mb-4 underline">
+                                Overall Statistics:
+                            </h2>
+                            {isLoadingSummary ? (
+                                <p className="text-xs text-zinc-400 dark:text-zinc-100 italic text-center py-4">Calculating data balances...</p>
+                            ) : summaryMetrics.length > 0 ? (
+                                <div className="grid grid-cols-3 gap-x-24 w-200 gap-y-1">
+                                {summaryMetrics.map((item) => (
+                                    <p key={item.metric_name} className="text-xs text-zinc-600 dark:text-zinc-100 flex justify-between py-1">
+                                    <span className="font-medium text-zinc-500 dark:text-zinc-100 capitalize">
+                                        {item.metric_name.replace(/_/g, ' ')}:
+                                    </span>
+                                    <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
+                                        {item.metric_value !== null ? item.metric_value.toFixed(3) : "N/A"}
+                                    </span>
+                                    </p>
+                                ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-zinc-400 dark:text-zinc-100 text-center py-4">No data sessions selected</p>
+                            )}
+                        </Card>
+                    </div>
             </div>
         </div>
     )

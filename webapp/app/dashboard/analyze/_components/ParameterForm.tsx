@@ -97,8 +97,8 @@ function ParameterSelect({ config, value, onChange }: { config: SelectFilterConf
   };
 
   return (
-    <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 border border-zinc-200 rounded-xl shadow-sm">
-      <label className="text-xs font-bold text-zinc-700 block mb-2">{config.label}</label>
+    <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
+      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-100 block mb-2">{config.label}</label>
       <div className="flex flex-wrap gap-1.5">
         {config.options.map((opt) => {
           const isSelected = value.includes(opt.value);
@@ -109,8 +109,8 @@ function ParameterSelect({ config, value, onChange }: { config: SelectFilterConf
               onClick={() => handleToggleOption(opt.value)}
               className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition ${
                 isSelected 
-                  ? 'bg-teal-700 text-white border-teal-700 shadow-sm' 
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-100'
+                  ? 'bg-teal-700 text-white border-teal-700 dark:bg-teal-600 shadow-sm' 
+                  : 'bg-white text-zinc-600 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:bg-black dark:text-zinc-100'
               }`}
             >
               {opt.label}
@@ -137,13 +137,13 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
   };
 
   return (
-    <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 border border-zinc-200 rounded-xl shadow-sm">
+    <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm">
       {/* Label and Value Badge */}
       <div className="flex justify-between items-center mb-2">
-        <label className="text-xs font-bold text-zinc-700">
+        <label className="text-xs font-bold text-zinc-700 dark:text-zinc-100">
           {config.label}
         </label>
-        <span className="text-[11px] font-mono font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
+        <span className="text-[11px] font-mono font-semibold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {min} - {max} {config.unit}
         </span>
       </div>
@@ -151,11 +151,11 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
       {/* Interactive Dual Slider Track Wrapper */}
       <div className="relative w-full h-5 flex items-center mt-2">
         {/* Background Track Line */}
-        <div className="absolute left-0 right-0 h-1 bg-zinc-200 rounded-lg pointer-events-none" />
+        <div className="absolute left-0 right-0 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-lg pointer-events-none" />
         
         {/* Dynamic Highlighted Range Fill */}
         <div 
-          className="absolute h-1 bg-teal-700 rounded-lg pointer-events-none"
+          className="absolute h-1 bg-teal-700 dark:bg-teal-400 rounded-lg pointer-events-none"
           style={{
             left: `${((min - config.minLimit) / (config.maxLimit - config.minLimit)) * 100}%`,
             right: `${100 - ((max - config.minLimit) / (config.maxLimit - config.minLimit)) * 100}%`
@@ -223,7 +223,7 @@ export default function ParameterForm({onSubmitFilters, currentFilters} : Parame
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto p-4">
       <div className="text-center">
-        <h2 className="text-base font-bold text-zinc-800">
+        <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-100">
           The Parameters are as follows:
         </h2>
       </div>
@@ -258,7 +258,7 @@ export default function ParameterForm({onSubmitFilters, currentFilters} : Parame
       
       <button 
         type="submit"
-        className="flex justify-center items-center text-center rounded-xl h-10 w-full bg-teal-800 text-zinc-100 font-semibold text-sm hover:bg-teal-700 transition-all shadow-sm"
+        className="flex justify-center items-center text-center rounded-xl h-10 w-full bg-teal-800 dark:bg-teal-600 text-zinc-100 font-semibold text-sm hover:bg-teal-700 transition-all shadow-sm"
       >
         Submit Parameters
       </button>

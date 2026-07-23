@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useDevices } from '@/app/context/DeviceContext';
 import PayloadComponent from './payload'
 import { ThemeToggle } from '@/components/ui/themeButton';
+import { Card } from '@/components/ui/card';
 
 
 interface DeviceCode {
@@ -175,13 +176,14 @@ export default function TestingPage(){
                     </select>
                     <Link 
                         href="/dashboard/test/add-headset"
-                        className="flex justify-center items-center rounded h-8 w-32 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
+                        className="flex justify-center items-center rounded h-8 w-32 bg-teal-600 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
                     >
                         Add Headset
                     </Link>
                 </div>
                 <div className="flex justify-center items-center gap-12 w-full">
-                    <div className="flex flex-col px-12 w-1/3 gap-4 mt-8">
+                    <Card className="flex-1 bg-white dark:bg-black w-1/3 p-6">
+                    <div className="flex flex-col px-12 w-full gap-4 mt-4">
                         <h3 className="text-center text-2xl font-bold underline text-zinc-700 dark:text-zinc-300">
                             Send Patient and Test Information to Headset:
                         </h3>
@@ -338,8 +340,9 @@ export default function TestingPage(){
                                 </div>
                             </div>
                         </div>
-                        <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-800 text-white rounded">Submit (Test Connection to Web Socket)</button>
+                        <button onClick={()=>serverCheck()} className="justify-center items-center bg-teal-600 hover:bg-teal-700 text-white rounded">Submit (Test Connection to Web Socket)</button>
                     </div>
+                    </Card>
                     <div className="flex-1">
                         <h2 className="text-center font-bold text-2xl text-zinc-700 dark:text-zinc-100 mb-4">
                             Headset Live Feed
@@ -349,8 +352,10 @@ export default function TestingPage(){
                         </canvas>
                     </div>
                     <div className="flex-1">
-                        <PayloadComponent title="Patient Data" payload={formPatientData} />
-                        <PayloadComponent title="Test Settings Data" payload={formSettingsData} />
+                        <Card className="bg-white dark:bg-black p-6 mt-6">
+                            <PayloadComponent title="Patient Data" payload={formPatientData} />
+                            <PayloadComponent title="Test Settings Data" payload={formSettingsData} />
+                        </Card>
                     </div>
                 </div>
             </div>
