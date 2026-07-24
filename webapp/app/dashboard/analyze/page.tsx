@@ -168,6 +168,7 @@ export default function AnalyzingPage() {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
+    const [committedSessionIds, setCommittedSessionIds] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     
@@ -278,16 +279,13 @@ export default function AnalyzingPage() {
     };
 
     const handleSubmitSelection = (paramOverride?: MetricParameter) => {
-        console.log("Sending these IDs to Recharts:", selectedSessionIds);
-        setIsModalOpen(false); //more gracefully perhaps? Transition? 
-
         const parameter = paramOverride || activeParameter;
+        const finalizedSelections = selectedSessionIds;
 
-        console.log("Received Override Argument:", paramOverride);
-        console.log("Fallback State Value:      ", activeParameter);
-        console.log("FINAL RESOLVED PARAMETER:  ", `"${parameter}"`);
-        
-        const freshData = generateChartData(sessions, selectedSessionIds, parameter);
+        setCommittedSessionIds(finalizedSelections);
+        setIsModalOpen(false);
+
+        const freshData = generateChartData(sessions, finalizedSelections, parameter);
         setChartData(freshData);
     };
 
@@ -534,7 +532,7 @@ export default function AnalyzingPage() {
 
     useEffect(() => {
         const fetchCohortSummary = async () => {
-            if (!selectedSessionIds || selectedSessionIds.length === 0) {
+            if (!committedSessionIds || committedSessionIds.length === 0) {
             setSummaryMetrics([]);
             return;
             }
@@ -544,7 +542,7 @@ export default function AnalyzingPage() {
             // Directly execute your custom Postgres math engine block
             const { data, error } = await supabase
                 .rpc('get_cohort_summary', { 
-                target_session_ids: selectedSessionIds 
+                target_session_ids: committedSessionIds 
                 });
 
             if (error) throw error;
@@ -557,7 +555,7 @@ export default function AnalyzingPage() {
         };
 
         fetchCohortSummary();
-    }, [selectedSessionIds]);
+    }, [committedSessionIds]);
 
     useEffect(() => {
         setMounted(true);
@@ -628,7 +626,7 @@ export default function AnalyzingPage() {
             </div>
             <div className="flex w-full justify-center items-center">
                 <Card className="bg-white dark:bg-black w-full p-6 mt-4">
-                    <div className="w-256 h-128 mt-8 mb-4 pr-10">
+                    <div className="w-256 h-128 mt-8 mb-4 pr-20">
                         <ResponsiveContainer key={resolvedTheme} width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
@@ -656,7 +654,7 @@ export default function AnalyzingPage() {
                                     )
                                 ) : (
                                     sessions
-                                    .filter(s => selectedSessionIds.includes(s.session_id))
+                                    .filter(s => committedSessionIds.includes(s.session_id))
                                     .map((session, idx) => (
                                         <Line
                                         key={session.session_id}

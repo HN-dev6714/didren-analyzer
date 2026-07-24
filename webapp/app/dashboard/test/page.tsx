@@ -70,7 +70,32 @@ export default function TestingPage(){
         height: 175, 
         weight: 70, 
     });
+
     const [formSettingsData, setFormSettingsData] = useState<TestSettingsPayload>({
+        test_name: 'Horizontal',
+        angle: 0,
+        distance: 2.0,
+        accuracy: 0.95,
+        radius: 0.5,
+        target_height: 1.2,
+        size: 1.0,
+        cycles: 10,
+        test_audio: true,
+        cursor_trail: false,
+        validation_time: 1.5
+    });
+
+    const [committedPatientData, setCommittedPatientData] = useState<PatientPayload>({
+        first_name: '',
+        surname: '',
+        sex: 'Unspecified',
+        language: 'EN',
+        age: 30,
+        height: 175,
+        weight: 70,
+    });
+
+    const [committedSettingsData, setCommittedSettingsData] = useState<TestSettingsPayload>({
         test_name: 'Horizontal',
         angle: 0,
         distance: 2.0,
@@ -89,7 +114,7 @@ export default function TestingPage(){
     if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
         
         const runtimeSetupMessage = {
-            targetId: "TEST_THERAPIST_123", // Replace dynamically with the active headset ID if needed
+            targetId: "TEST_THERAPIST_123", // change to the active headset
             action: "LOAD_SESSION",
             payload: {
                 patient_profile: {
@@ -117,6 +142,8 @@ export default function TestingPage(){
             }
         };
 
+        setCommittedPatientData({ ...patient });
+        setCommittedSettingsData({ ...settings });
         socket.send(JSON.stringify(runtimeSetupMessage));
         console.log("Session parameters successfully synchronized to the server.");
     } else {
@@ -139,12 +166,64 @@ export default function TestingPage(){
         }
     }
 
+    function retrieveSessionInfo(){
+        if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
+            socket.onmessage = (e) => {
+                try {
+                    const message = JSON.parse(e.data);
+                    const incomingPatient = message?.payload?.patient_profile;
+                    const incomingSettings = message?.payload?.test_configuration;
+
+                    if (incomingPatient) {
+                        setCommittedPatientData({
+                            first_name: incomingPatient.firstName ?? '',
+                            surname: incomingPatient.surname ?? '',
+                            sex: incomingPatient.sex ?? 'Unspecified',
+                            language: incomingPatient.language ?? 'EN',
+                            age: typeof incomingPatient.age === 'number' ? incomingPatient.age : 0,
+                            height: typeof incomingPatient.height === 'number' ? incomingPatient.height : 0,
+                            weight: typeof incomingPatient.weight === 'number' ? incomingPatient.weight : 0,
+                        });
+                    }
+
+                    if (incomingSettings) {
+                        setCommittedSettingsData({
+                            test_name: incomingSettings.testName ?? 'Horizontal',
+                            angle: typeof incomingSettings.angle === 'number' ? incomingSettings.angle : 0,
+                            distance: typeof incomingSettings.distance === 'number' ? incomingSettings.distance : 0,
+                            accuracy: typeof incomingSettings.accuracy === 'number' ? incomingSettings.accuracy : 0,
+                            radius: typeof incomingSettings.radius === 'number' ? incomingSettings.radius : 0,
+                            target_height: typeof incomingSettings.targetHeight === 'number' ? incomingSettings.targetHeight : 0,
+                            size: typeof incomingSettings.size === 'number' ? incomingSettings.size : 0,
+                            cycles: typeof incomingSettings.cycles === 'number' ? incomingSettings.cycles : 0,
+                            test_audio: Boolean(incomingSettings.enableAudio),
+                            cursor_trail: Boolean(incomingSettings.enableTrail),
+                            validation_time: typeof incomingSettings.validationTime === 'number' ? incomingSettings.validationTime : 0,
+                        });
+                    }
+
+                    console.log("Live session info received from socket.");
+                    console.log(message);
+                } catch (error) {
+                    console.error("Unable to parse websocket payload:", error);
+                }
+            }
+        } else{
+            console.error("Socket may be disconnected or offline");
+        }
+    }
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
         // Pass both states directly into your transmission engine
         sendSessionSetup(formPatientData, formSettingsData);
     };
+
+    useEffect(() => {
+        if (socket && isConnected && socket.readyState === WebSocket.OPEN) {
+            retrieveSessionInfo();
+        }
+    }, [socket, isConnected]);
 
     if (isLoading) return <div>Loading!</div>
     if (errorMessage) return <div>Error! {errorMessage}</div>;
@@ -353,8 +432,8 @@ export default function TestingPage(){
                     </div>
                     <div className="flex-1">
                         <Card className="bg-white dark:bg-black p-6 mt-6">
-                            <PayloadComponent title="Patient Data" payload={formPatientData} />
-                            <PayloadComponent title="Test Settings Data" payload={formSettingsData} />
+                            <PayloadComponent title="Patient Data" payload={committedPatientData} />
+                            <PayloadComponent title="Test Settings Data" payload={committedSettingsData} />
                         </Card>
                     </div>
                 </div>
