@@ -54,7 +54,7 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
                 }`}
                 >
                 <div>
-                    <p>{session.patients?.first_name || 'we don\'t know'} {session.patients?.surname || ''} at <DateFormatter isoString={session.session_timestamp?? ''} showTime={true} /> and the ID is probably {session.session_id}</p>
+                    <p>{session.patients?.first_name || 'we don\'t know'} {session.patients?.surname || ''} at <DateFormatter isoString={session.session_timestamp?? ''} showTime={true} /></p>
                 </div>
 
                 {/* Visual Checkbox Indicator */}

@@ -128,7 +128,7 @@ export function AddHeadsetForm() {
             <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200 ">Pairing Code</label>
             <input 
                 type="text" 
-                placeholder="e.g. 12345" 
+                placeholder="e.g. 123456" 
                 maxLength={6}
                 value = {pinInput}
                 disabled = {isLoading}

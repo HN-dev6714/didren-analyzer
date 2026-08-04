@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
+import type { Metadata } from "next";
 
 /**
  * The Dashboard Page
@@ -13,11 +14,17 @@ import { createClient } from "@/utils/supabase/server"
  * @param param0 children
  * @returns i'm really not sure what this returns
  */
+export const metadata: Metadata = {
+  title: "Didren Analyzer",
+  description: "An application to analyze and test data on VR headsets via the Didren test all in one spot", 
+};
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
   // Ask the Supabase Engine to decrypt the cookie and check the user record
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
 
   // If the user session is expired, tampered with, or missing, bounce them back to login
   if (error || !user) {
