@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
-import type { Metadata } from "next";
 
 /**
  * The Dashboard Page
@@ -14,10 +13,6 @@ import type { Metadata } from "next";
  * @param param0 children
  * @returns i'm really not sure what this returns
  */
-export const metadata: Metadata = {
-  title: "Didren Analyzer",
-  description: "An application to analyze and test data on VR headsets via the Didren test all in one spot", 
-};
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
