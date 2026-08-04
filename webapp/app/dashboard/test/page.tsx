@@ -249,7 +249,7 @@ export default function TestingPage(){
                     <select className="w-50 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 bg-white dark:bg-black rounded-md focus:outline-hidden focus:ring-2 focus:ring-teal-500">
                         {devices.map((device) => (
                             <option key={device.headset_serial} value={device.headset_serial}>
-                                Headset ({device.headset_serial.substring(0, 8)})
+                                {device.nickname}
                             </option>
                         ))}
                     </select>

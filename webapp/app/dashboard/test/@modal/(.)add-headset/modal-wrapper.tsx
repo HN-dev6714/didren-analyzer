@@ -20,10 +20,9 @@ export function ModalWrapper({ children }: { children: React.ReactNode }) {
       onClick={() => router.back()} 
       className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm p-4"
     >
-      {/* stopPropagation prevents clicking the inner box from closing the modal */}
       <div 
         onClick={(e) => e.stopPropagation()} 
-        className="relative w-full max-w-md bg-zinc-200 border border-zinc-200 p-6 rounded-xl"
+        className="relative w-full max-w-md bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl"
       >
         {children}
       </div>

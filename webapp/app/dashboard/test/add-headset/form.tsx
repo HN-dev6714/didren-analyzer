@@ -63,6 +63,14 @@ export function AddHeadsetForm() {
                 return;
             }
 
+            const { error: headsetUpdateError } = await supabase
+                .from('headsets')
+                .update({ nickname: headsetName.trim() })
+                .eq('headset_serial_number', validCodeEntry.headset_serial); 
+            if (headsetUpdateError) {
+                throw new Error(`Failed to update headset name: ${headsetUpdateError.message}`);
+            }
+
             //link therapist to headset
             const { error: linkError } = await supabase
                 .from('therapist_headset_map')
@@ -110,14 +118,14 @@ export function AddHeadsetForm() {
     return (
     <div className="flex flex-col gap-4 w-full">
         <div>
-            <h1 className="text-xl font-bold text-teal-700 text-center">Pair New VR Headset</h1>
-            <p className="text-xs text-zinc-600 mt-1 text-center">
+            <h1 className="text-xl font-bold text-teal-700 dark:text-teal-400 text-center">Pair New VR Headset</h1>
+            <p className="text-xs text-zinc-600 dark:text-zinc-200 mt-1 text-center">
                 Enter the code shown on the VR Headset Screen:
             </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-zinc-700">Pairing Code</label>
+            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200 ">Pairing Code</label>
             <input 
                 type="text" 
                 placeholder="e.g. 12345" 
@@ -125,12 +133,12 @@ export function AddHeadsetForm() {
                 value = {pinInput}
                 disabled = {isLoading}
                 onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-                className="text-zinc-900 h-10 bg-zinc-200 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest uppercase text-center font-mono focus:outline-none focus:border-teal-500"
+                className="text-zinc-900 dark:text-zinc-300 h-10 bg-zinc-200 dark:bg-zinc-800 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest uppercase text-center font-mono focus:outline-none focus:border-teal-500"
             />
         </div>
 
         <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-zinc-700">Headset Name</label>
+            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200 ">Headset Name</label>
             <input 
                 type="text" 
                 placeholder="E.G. Headset 1" 
@@ -138,7 +146,7 @@ export function AddHeadsetForm() {
                 value = {headsetName}
                 disabled = {isLoading}
                 onChange={(e) => setHeadsetName(e.target.value)}
-                className="text-zinc-900 h-10 bg-zinc-200 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest text-center font-mono focus:outline-none focus:border-teal-500"
+                className="text-zinc-900 dark:text-zinc-300 h-10 bg-zinc-200 dark:bg-zinc-800 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest text-center font-mono focus:outline-none focus:border-teal-500"
             />
         </div>
 

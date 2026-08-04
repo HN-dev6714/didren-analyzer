@@ -8,15 +8,36 @@ import Link from "next/link"
 import { ThemeToggle } from '@/components/ui/themeButton';
 import MagnifyingGlassIcon from '@/public/images/MagnifyingGlassIcon.svg';
 import TargetIcon from '@/public/images/TargetIcon.svg';
+import { createClient } from '@/utils/supabase/client';
+import { useDevices } from '@/app/context/DeviceContext';
 
 export default function DashboardOverviewPage() {
+
+  const router = useRouter();
+  const supabase = createClient();
+  const { clearDevices } = useDevices();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+
+      clearDevices();
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      router.push('/');
+      router.refresh(); 
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
     <div className="relative flex flex-col w-full h-screen justify-start items-center p-6">
-      <Link href="/">
-        <button className="absolute top-8 left-8 bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-800 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
+        <button onClick={handleLogout} className="absolute top-8 left-8 bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-800 flex justify-center items-center rounded h-8 w-20 text-sm font-medium hover:bg-zinc-700 transition-colors">
           Log Out
         </button>
-      </Link>
       <div className="absolute top-8 right-8">
         <ThemeToggle/>
       </div>

@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
-// Keep your interface clean and accurate
 interface Device {
   headset_serial: string;
   code: string;
@@ -16,6 +15,7 @@ interface DeviceContextType {
   isLoading: boolean;
   errorMessage: string;
   addDevice: (newDevice: Device) => void;
+  clearDevices: () => void;
 }
 
 const DeviceContext = createContext<DeviceContextType | undefined>(undefined);
@@ -24,11 +24,28 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
 
-  // The useEffect now lives here globally!
+  const clearDevices = () => {
+    setDevices([]);
+  };
+  
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id ?? null);
+      });
+
+      return () => subscription.unsubscribe();
+    }, []);
+
   useEffect(() => {
     async function fetchHeadsetData() {
+      if (!userId) {
+        setDevices([]);
+        return;
+      }
       try {
         setIsLoading(true);
         const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -48,14 +65,21 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
         if (fetchError) throw fetchError;
 
-        const formattedDevices = (mappingList || []).map(item => ({
+        const formattedDevices = (mappingList || []).map(item => {
+        const headsetData = Array.isArray(item.headsets) 
+          ? item.headsets[0] 
+          : item.headsets;
+
+        return {
           headset_serial: item.headset_serial_number,
           code: 'PAIRED',
           expiration: 'Permanent',
-          nickname: 'Placeholder'
-        }));
+          nickname: headsetData?.nickname || 'Unnamed Headset'
+        };
+      });
 
         setDevices(formattedDevices);
+
       } catch (error: any) {
         console.error('Error fetching data globally: ', error);
         setErrorMessage('Failed to load headsets');
@@ -65,7 +89,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     }
 
     fetchHeadsetData();
-  }, []); // Empty dependency array means this runs ONCE for the whole app session
+  }, [userId]);
 
   const addDevice = async (newDevice: Device) => {
     try {
@@ -105,7 +129,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <DeviceContext.Provider value={{ devices, isLoading, errorMessage, addDevice }}>
+    <DeviceContext.Provider value={{ devices, isLoading, errorMessage, addDevice, clearDevices }}>
       {children}
     </DeviceContext.Provider>
   );
