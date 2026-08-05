@@ -10,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/themeButton';
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 
-
+//very long session interface, is this why everything is running slowly? 
 export interface Session {
     session_id: string;
     headset_serial_number: string;
@@ -173,15 +173,16 @@ export default function AnalyzingPage() {
     const [errorMessage, setErrorMessage] = useState('');
     
     const supabase = createClient();
-    const showAdvancedMetrics = userRole === 'researcher';
+    const showAdvancedMetrics = userRole === 'researcher'; //well we did not implement this quite yet
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAverage, setIsAverage] = useState<boolean>(false);
 
     const [activeParameter, setActiveParameter] = useState<MetricParameter>('acc_x');
 
-    const { resolvedTheme } = useTheme(); // 'resolvedTheme' handles 'system' mode cleanly
+    const { resolvedTheme } = useTheme(); // fetches theme
     const [mounted, setMounted] = useState(false);
 
+    //theme and color palettes, feel free to play around!
     const isDark = mounted && resolvedTheme === "dark";
     const lineColors = isDark
     ? ["#2dd4bf", "#f43f5e", "#fbbf24", "#a855f7", "#38bdf8"] 
@@ -195,28 +196,17 @@ export default function AnalyzingPage() {
     const [summaryMetrics, setSummaryMetrics] = useState<CohortMetric[]>([]);
     const [isLoadingSummary, setIsLoadingSummary] = useState(false);
 
-    const nonMetricKeys = new Set([
-        'session_id',
-        'headset_serial_number',
-        'patient_id',
-        'config_id',
-        'session_timestamp',
-        'motion_data',
-        'headsets',
-        'patients'
-    ]);
-
 
     function generateChartData(
         sessions: Session[],
         selectedSessionIds: string[],
-        activeParameter: MetricParameter // Or your specific MetricParameter type
+        activeParameter: MetricParameter
     ): any[] {
-        // 1. Filter down to only sessions chosen by the therapist checkboxes
+        //filter to only selected sessions
         const activeSessions = sessions.filter(s => selectedSessionIds.includes(s.session_id));
         if (activeSessions.length === 0) return [];
 
-        // 2. Gather all unique timestamps across selected sessions to avoid index-shift drops
+        // gather the timestamps
         const allTimestamps = new Set<number>();
         activeSessions.forEach(session => {
             session.motion_data?.forEach(point => {
@@ -226,17 +216,17 @@ export default function AnalyzingPage() {
             });
         });
 
-        // 3. Sort chronologically left-to-right
+        // sort all the timestamps
         const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
-        // 4. Map timestamps into unified cross-session snapshots
+        //put all sessions motion data of one timestamp together
         return sortedTimestamps.map((timeNumber) => {
             const dataRow: any = { timestamp: timeNumber };
             let sum = 0;
             let count = 0;
 
             activeSessions.forEach((session) => {
-                // Find sensor point matching this timestamp with a tiny floating-point margin
+                //match sensor point, allow a margin
                 const matchingPoint = session.motion_data?.find(
                     (point) => Math.abs(point.timestamp_delta - timeNumber) < 0.001
                 );
@@ -244,7 +234,7 @@ export default function AnalyzingPage() {
                 if (matchingPoint && matchingPoint[activeParameter] !== undefined) {
                     const val = Number(matchingPoint[activeParameter]);
                     
-                    // Key the sensor metric directly to the unique session ID
+                    //key the sensor metric directly to the unique session ID
                     dataRow[session.session_id] = val;
                     
                     sum += val;
@@ -252,7 +242,7 @@ export default function AnalyzingPage() {
                 }
             });
 
-            // Add a baseline average key in case the user toggles the global average line
+            //reserve average key for when the average line is toggled
             dataRow.average = count > 0 ? sum / count : 0;
 
             return dataRow;
@@ -264,7 +254,7 @@ export default function AnalyzingPage() {
         if (filter.type === 'range') {
             acc[filter.id] = [filter.minLimit, filter.maxLimit];
         } else if (filter.type === 'select') {
-            acc[filter.id] = []; // Empty array means "everything selected/no constraint"
+            acc[filter.id] = []; //no filters
         }
       return acc;
         }, {} as Record<string, any >);
@@ -293,7 +283,7 @@ export default function AnalyzingPage() {
         setIsLoading(true);
         try {
             setSavedFilterStates(filterStates);
-
+            //select data we'll need with the selected filters
             let query = supabase
                 .from('sessions') 
                 .select(`
@@ -315,14 +305,15 @@ export default function AnalyzingPage() {
                     )
                 `);
 
-            // Step 1: Handle Numerical Ranges via Safe Destructuring
+            //handle parameters that use ranges
             Object.entries(filterStates).forEach(([id, value]) => {
-                // Skip non-range parameters inside the loop
+                //skip parameters that don't use ranges
                 if (['sex', 'test_name', 'cursor_trail', 'test_audio'].includes(id)) return;
                 
-                // At this point, TS/JS safely knows value is a range tuple: [minVal, maxVal]
+                //safely using minVal and maxVal now that we know what is happening
                 const [minVal, maxVal] = value as [number, number];
 
+                //where to find the values of these parameters (patients or test_settings table)
                 if (['age', 'bmi', 'height', 'weight'].includes(id)) {
                     query = query.gte(`patients.${id}`, minVal).lte(`patients.${id}`, maxVal);
                 } else {
@@ -330,26 +321,24 @@ export default function AnalyzingPage() {
                 }
             });
 
-            // Step 2: Handle Polymorphic Selection Arrays (SQL "IN" matching)
-            // Only filter if the user selected at least one option. If empty, include all.
+            //handle the other parameters
             if (filterStates.sex && filterStates.sex.length > 0) {
                 query = query.in('patients.sex', filterStates.sex);
             }
             
             if (filterStates.test_name && filterStates.test_name.length > 0) {
-                // Fixed table path prefix wrapper context matcher matching your .select() layout
                 query = query.in('test_settings.test_name', filterStates.test_name);
             }
 
-            // Step 3: Handle Boolean Constraint Matching
+            //handle the parameters that deal with booleans
             if (filterStates.cursor_trail && filterStates.cursor_trail.length > 0) {
-                // Convert string array e.g., ['true'] -> [true]
+                //turn strings into boolean values
                 const booleanValues = filterStates.cursor_trail.map((val: string) => val === 'true');
                 query = query.in('test_settings.cursor_trail', booleanValues);
             }
 
             if (filterStates.test_audio && filterStates.test_audio.length > 0) {
-                // Convert string array e.g., ['true', 'false'] -> [true, false]
+                //turn strings into boolean values
                 const booleanValues = filterStates.test_audio.map((val: string) => val === 'true');
                 query = query.in('test_settings.test_audio', booleanValues);
             }
@@ -357,7 +346,7 @@ export default function AnalyzingPage() {
             const { data, error } = await query;
             if (error) throw error;
 
-            // Transform raw database rows to fit your strict Session format
+            // turn database rows to session interface
             const formattedSessions: Session[] = (data || []).map((row: any) => ({
                 session_id: row.session_id,
                 headset_serial_number: row.headset_serial_number,
@@ -402,6 +391,7 @@ export default function AnalyzingPage() {
                 if (userError) throw userError;
                 if (!user) return;
 
+                //retrieve all headsets that work
                 const { data: mappings, error: mapError } = await supabase
                     .from('therapist_headset_map')
                     .select('headset_serial_number')
@@ -415,11 +405,12 @@ export default function AnalyzingPage() {
 
                 if (mapError) throw mapError;
                 const therapistSerials = mappings.map(m => m.headset_serial_number);
-                // Extract user role (assuming it's stored in user_metadata)
+                //get user role, and have a placeholder if necessary
                 const role = user.user_metadata?.role || 'clinician';
                 setUserRole(role);
 
-                // We must include 'therapist_headset_map!inner(therapist_id)' inside the quotes!
+                //select all information needed form the supabase
+                //this might be the reason why it's so slow to load the graphs
                 const { data: sessionList, error: fetchError } = await supabase
                 .from('sessions')
                 .select(`
@@ -484,13 +475,11 @@ export default function AnalyzingPage() {
 
                 if (fetchError) throw fetchError;
 
-                // Cast our data over to our state hook array
+                //take all this data and bring it to the state variable (later we call setSessions)
                 const parsedList: Session[] = (sessionList || []).map((row: any) => {
-                // 1. Pull out the relational sub-objects; everything left in 'metrics' are the flat database columns
                 const { headsets, patients, motion_data, ...metrics } = row;
 
                 return {
-                    // 2. Spread the top-level keys (session_id, timestamps, and all your 60+ new min/max/mean metrics)
                     ...metrics,
                     
                     session_id: row.session_id,
@@ -500,7 +489,7 @@ export default function AnalyzingPage() {
                     session_timestamp: row.session_timestamp,
                     motion_data: motion_data || [],
                     
-                    // 3. Map your relations with safe fallbacks
+                    // relations with fallbacks, in case we cannot find what we need
                     headsets: headsets
                         ? {
                             headset_serial_number: headsets.headset_serial_number,
@@ -528,29 +517,29 @@ export default function AnalyzingPage() {
         }
 
         retrieveSessions();
-    }, []); // Added the empty dependency array to prevent the infinite loop!
+    }, []);
 
     useEffect(() => {
+        //fetch the summary for the "overall statistics"
         const fetchCohortSummary = async () => {
             if (!committedSessionIds || committedSessionIds.length === 0) {
-            setSummaryMetrics([]);
-            return;
+                setSummaryMetrics([]);
+                return;
             }
 
             setIsLoadingSummary(true);
             try {
-            // Directly execute your custom Postgres math engine block
-            const { data, error } = await supabase
-                .rpc('get_cohort_summary', { 
-                target_session_ids: committedSessionIds 
-                });
+                const { data, error } = await supabase
+                    .rpc('get_cohort_summary', { 
+                        target_session_ids: committedSessionIds 
+                    });
 
-            if (error) throw error;
-            setSummaryMetrics(data || []);
+                if (error) throw error;
+                setSummaryMetrics(data || []);
             } catch (err) {
-            console.error("Failed fetching database summary tracking matrix:", err);
+                console.error("Failed fetching database summary tracking matrix:", err);
             } finally {
-            setIsLoadingSummary(false);
+                setIsLoadingSummary(false);
             }
         };
 
@@ -626,6 +615,7 @@ export default function AnalyzingPage() {
             </div>
             <div className="flex w-full justify-center items-center">
                 <Card className="bg-white dark:bg-black w-full p-6 mt-4">
+                    {/* the graph */}
                     <div className="w-256 h-128 mt-8 mb-4 pr-20">
                         <ResponsiveContainer key={resolvedTheme} width="100%" height="100%">
                             <LineChart data={chartData}>
@@ -659,11 +649,11 @@ export default function AnalyzingPage() {
                                         <Line
                                         key={session.session_id}
                                         type="monotone"
-                                        dataKey={session.session_id} // Points directly to the key path inside chartData
-                                        name={session.patients?.first_name || `Session ${session.session_id.slice(0,4)}`} // Clean Legend Labels
+                                        dataKey={session.session_id} // points directly to the key path inside chartData
+                                        name={session.patients?.first_name || `Session ${session.session_id.slice(0,4)}`} // legend labels
                                         stroke={lineColors[idx % lineColors.length]}
                                         strokeWidth={2}
-                                        dot={false} // Hides cluttering coordinate anchor dots for smoother presentation
+                                        dot={false}
                                         />
                                     ))
                                 )}

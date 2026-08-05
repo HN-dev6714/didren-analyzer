@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Create a structural shape blueprint for our context state
+//socket context interface and its components needed
 interface SocketContextType {
   socket: WebSocket | null;
   isConnected: boolean;
@@ -15,9 +15,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // 1. Establish the connection inside useEffect so it only executes on the client browser
+    //establish the connection inside useEffect so it only executes on the client browser
     const ws = new WebSocket('ws://localhost:8080?role=therapist&id=TEST_THERAPIST_123');
 
+    //assign the proper functions to the web socket
     ws.onopen = () => {
       console.log("WebSocket connection pipeline successfully secured!");
       setIsConnected(true);
@@ -34,7 +35,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     setSocket(ws);
 
-    // Clean up connection if the user closes the app tab
+    //clean up connection if the user closes the app tab
     return () => {
       ws.close();
     };
@@ -47,7 +48,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Build a clean custom hook so pages can pull the connection safely
+//build a hook so pages can pull the connection safely
 export function useSocket() {
   const context = useContext(SocketContext);
   if (context === undefined) {

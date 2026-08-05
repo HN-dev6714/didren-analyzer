@@ -1,27 +1,15 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
 
-/**
- * The Dashboard Page
- * 
- * This page will contain two pathways: to the testing or analyzing page.
- * After confirming that the user is indeed a valid user and is logged in, 
- * we offer the options to go to the testing or analyzing page. 
- * Maybe we create a log out feature, or a user account page where users
- * can log out, delete account, or change parameters. 
- * 
- * @param param0 children
- * @returns i'm really not sure what this returns
- */
-
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
-  // Ask the Supabase Engine to decrypt the cookie and check the user record
+  //ask the Supabase Engine to decrypt the cookie and check the user record
   const { data: { user }, error } = await supabase.auth.getUser();
   
 
-  // If the user session is expired, tampered with, or missing, bounce them back to login
+  //if the user session is invalid, send them back to login
+  //this is to prevent people from typing /dashboard and landing in the dashboard page without an naccount
   if (error || !user) {
     redirect("/")
   }

@@ -1,14 +1,14 @@
 import React from 'react';
 
-// Define what props this component expects to receive
+//define what props this component expects to receive
 interface MetricViewerProps {
   title: string;
-  // This tells TypeScript it can accept any flat key-value object structure
+  //tells TypeScript it can accept any flat key-value object structure
   payload: Record<string, any>; 
 }
 
 export default function StructuralMetricViewer({ title, payload }: MetricViewerProps) {
-  // If no data has arrived yet, display a subtle fallback
+  //if no data has arrived yet, display a fallback
   if (!payload || Object.keys(payload).length === 0) {
     return (
       <div className="p-4 bg-white border border-zinc-200 rounded-xl">
@@ -26,11 +26,13 @@ export default function StructuralMetricViewer({ title, payload }: MetricViewerP
       <div>
         {Object.entries(payload).map(([key, value]) => {
           
+          //for every key in the payload, 
           let displayValue = String(value);
+          //check if boolean
           if (typeof value === 'boolean') {
             displayValue = value ? 'Enabled' : 'Disabled';
           }
-
+          //return the parameter (capitalized), and the display value (that we have converted into a string)
           return (
             <p 
               key={key} 

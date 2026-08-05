@@ -14,8 +14,10 @@ interface Props {
 
 export default function SessionList({ sessionList, selectedIds, onToggleSession, updateSessions}: Props) {
 
+    //tracking selected sessions
     const [isAllSelected, setIsAllSelected] = useState(false);
 
+    //functions to select all FILTERED sessions
     const selectAllSessions = () => {
         for(let i = 0; i < sessionList.length; i++){
             if(!selectedIds.includes(sessionList[i].session_id)){
@@ -25,6 +27,7 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
         setIsAllSelected(true);
     }
 
+    //functions to deselect all FILTERED sessions
     const deselectAllSessions = () => {
         for(let i = 0; i < sessionList.length; i++){
             if(selectedIds.includes(sessionList[i].session_id)){
@@ -39,7 +42,7 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
             <h2 className="text-sm font-bold text-zinc-700 dark:text-zinc-100 mb-2 text-center">Select Sessions:</h2>
             
             {sessionList.map((session) => {
-            // Check if this specific item is inside the active selection array
+            //true if item is in the selectedIds array
             const isSelected = selectedIds.includes(session.session_id);
 
             return (
@@ -57,7 +60,7 @@ export default function SessionList({ sessionList, selectedIds, onToggleSession,
                     <p>{session.patients?.first_name || 'we don\'t know'} {session.patients?.surname || ''} at <DateFormatter isoString={session.session_timestamp?? ''} showTime={true} /></p>
                 </div>
 
-                {/* Visual Checkbox Indicator */}
+                {/* checkboxes */}
                 <div className={`h-5 w-5 rounded-md border flex items-center justify-center transition-colors ${
                     isSelected ? 'bg-teal-600 border-teal-600 text-white' : 'border-zinc-300 bg-white'
                 }`}>

@@ -18,6 +18,7 @@ interface DeviceContextType {
   clearDevices: () => void;
 }
 
+//the device context is useful as both the testing and analyzing parts need the device information
 const DeviceContext = createContext<DeviceContextType | undefined>(undefined);
 
 export function DeviceProvider({ children }: { children: ReactNode }) {
@@ -28,6 +29,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
 
+  //function to clear the devices array, used when logging out
   const clearDevices = () => {
     setDevices([]);
   };
@@ -41,6 +43,8 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     }, []);
 
   useEffect(() => {
+    //fetch all devices associated with a given userId
+    //user Id may not be null
     async function fetchHeadsetData() {
       if (!userId) {
         setDevices([]);
@@ -53,6 +57,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         if (!user) return;
         if (userError) throw userError;
 
+        //reference supabase for the proper information
         const { data: mappingList, error: fetchError } = await supabase
         .from('therapist_headset_map')
         .select(`
@@ -65,6 +70,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
         if (fetchError) throw fetchError;
 
+        //format all devices into the variable map formattedDevices
         const formattedDevices = (mappingList || []).map(item => {
         const headsetData = Array.isArray(item.headsets) 
           ? item.headsets[0] 
@@ -77,10 +83,10 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
           nickname: headsetData?.nickname || 'Unnamed Headset'
         };
       });
-
+        //set these formattedDevices into the state variable stateDevices
         setDevices(formattedDevices);
 
-      } catch (error: any) {
+      } catch (error: any) { //catch any errors
         console.error('Error fetching data globally: ', error);
         setErrorMessage('Failed to load headsets');
       } finally {
@@ -91,6 +97,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     fetchHeadsetData();
   }, [userId]);
 
+  //adding a device-therapist mapping to the Supabase, given a device code pairing
   const addDevice = async (newDevice: Device) => {
     try {
       setIsLoading(true);
@@ -99,6 +106,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw new Error("User not authenticated");
 
+      //update or insert the headset retrieved from the device_codes and the nickname provided by users
       const { error: headsetError } = await supabase
         .from('headsets')
         .upsert({
@@ -109,6 +117,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
       if (headsetError) throw headsetError;
 
+      //add a therapist mapping between the user id and the headset serial number
       const { error: mapError } = await supabase
         .from('therapist_headset_map')
         .upsert({
@@ -118,6 +127,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
 
       if (mapError) throw mapError;
 
+      //add this device to the user's list of devices
       setDevices((prevDevices) => [...prevDevices, newDevice]);
 
     } catch (error: any) {

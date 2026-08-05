@@ -21,7 +21,7 @@ export interface RangeFilterConfig extends BaseFilterConfig {
 export interface SelectFilterConfig extends BaseFilterConfig {
   type: 'select';
   options: { value: string; label: string }[];
-  isMulti?: boolean; // Can use true for your multi-select requirements
+  isMulti?: boolean; //can use true for multi-select requirements
 }
 
 export type FilterConfig = RangeFilterConfig | SelectFilterConfig;
@@ -43,7 +43,12 @@ export const TEAMP_FILTERS: FilterConfig[] = [
     options: [
       { value: 'Horizontal', label: 'Horizontal' },
       { value: 'Vertical', label: 'Vertical' },
-      { value: 'Diagonal Left', label: 'Diagonal Left' }
+      { value: 'Diagonal Left', label: 'Diagonal Left' },
+      { value: 'Diagonal Right', label: 'Diagonal Right' },
+      { value: 'Triangle Up', label: 'Triangle Up' },
+      { value: 'Triangle Down', label: 'Triangle Down' },
+      { value: 'Triangle Left', label: 'Triangle Left' },
+      { value: 'Triangle Right', label: 'Triangle Right' }
     ]
   },
   {
@@ -88,7 +93,7 @@ interface ParameterProps{
 //for multi-select things
 function ParameterSelect({ config, value, onChange }: { config: SelectFilterConfig; value: string[]; onChange: (val: string[]) => void }) {
   const handleToggleOption = (val: string) => {
-    // Basic multi-select logic: add if missing, remove if present
+    //multi-select logic: add if missing, remove if present
     if (value.includes(val)) {
       onChange(value.filter(item => item !== val));
     } else {
@@ -125,20 +130,20 @@ function ParameterSelect({ config, value, onChange }: { config: SelectFilterConf
 function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfig; values: [number, number]; onChange: (min: number, mix: number) => void }) {
   const [min, max] = values;
 
-  // Track handle logic to prevent min crossing over max
+  //prevent min from crossing over max
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Math.min(Number(e.target.value), max - config.step);
+    const val = Math.min(Number(e.target.value), max);
     onChange(val, max);
   };
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Math.max(Number(e.target.value), min + config.step);
+    const val = Math.max(Number(e.target.value), min);
     onChange(min, val);
   };
 
   return (
     <div className="w-full max-w-xs my-4 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm">
-      {/* Label and Value Badge */}
+      {/* label and value */}
       <div className="flex justify-between items-center mb-2">
         <label className="text-xs font-bold text-zinc-700 dark:text-zinc-100">
           {config.label}
@@ -148,12 +153,11 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
         </span>
       </div>
 
-      {/* Interactive Dual Slider Track Wrapper */}
+      {/* min and max sliders */}
       <div className="relative w-full h-5 flex items-center mt-2">
-        {/* Background Track Line */}
         <div className="absolute left-0 right-0 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-lg pointer-events-none" />
         
-        {/* Dynamic Highlighted Range Fill */}
+        {/* filling range */}
         <div 
           className="absolute h-1 bg-teal-700 dark:bg-teal-400 rounded-lg pointer-events-none"
           style={{
@@ -162,7 +166,7 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
           }}
         />
 
-        {/* Minimum Thumb Slider */}
+        {/* minimum slider */}
         <input 
           type="range"
           min={config.minLimit}
@@ -173,7 +177,7 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
           className="absolute w-full h-1 appearance-none bg-transparent pointer-events-none cursor-pointer accent-teal-700 focus:outline-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-700"
         />
 
-        {/* Maximum Thumb Slider */}
+        {/* maximum slider */}
         <input 
           type="range"
           min={config.minLimit}
@@ -185,7 +189,7 @@ function ParameterSlider({ config, values, onChange }: {config: RangeFilterConfi
         />
       </div>
 
-      {/* Axis Limit Markers */}
+      {/* axis limit */}
       <div className="flex justify-between text-[10px] text-zinc-400 font-medium mt-1">
         <span>{config.minLimit}{config.unit}</span>
         <span>{config.maxLimit}{config.unit}</span>
@@ -205,7 +209,7 @@ export default function ParameterForm({onSubmitFilters, currentFilters} : Parame
       if (filter.type === 'range') {
         acc[filter.id] = [filter.minLimit, filter.maxLimit];
       } else if (filter.type === 'select') {
-        acc[filter.id] = []; // Empty array means "everything selected/no constraint"
+        acc[filter.id] = []; // no filters
       }
       return acc;
     }, {} as Record<string, any>);
@@ -228,10 +232,8 @@ export default function ParameterForm({onSubmitFilters, currentFilters} : Parame
         </h2>
       </div>
       
-      {/* 2. Dynamic Loop: Automatically draws sliders for all configuration criteria */}
       <div className="flex flex-col justify-center items-center">
         {TEAMP_FILTERS.map((filter) => {
-          // Dynamic Polymorphic Component Dispatching Matcher
           if (filter.type === 'range') {
             return (
               <ParameterSlider

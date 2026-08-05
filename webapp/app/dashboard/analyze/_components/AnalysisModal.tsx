@@ -16,7 +16,7 @@ export interface AnalysisModalProps{
     currentFilters: Record<string, [number, number]>;
 }
 
-
+//overall Analysis Modal that contains the ParameterForm and SessionList components
 export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds, onToggleSession, updateSessions, onSubmitFilters, currentFilters}: AnalysisModalProps){
     if(!isOpen) return null;
 
@@ -39,13 +39,14 @@ export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds
 
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
                 
+                {/* filters */}
                     <div className="md:col-span-5 p-6 border-r border-zinc-200 dark:border-zinc-700 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-900/50">
                         <ParameterForm 
                             onSubmitFilters={onSubmitFilters}
                             currentFilters={currentFilters}
                         />
                     </div>
-
+                {/* list of sessions */}
                     <div className="md:col-span-7 p-6 overflow-y-auto bg-white dark:bg-black">
                         <SessionList 
                             sessionList={sessionList}

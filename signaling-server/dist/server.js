@@ -41,11 +41,13 @@ const ws_1 = require("ws");
 const http = __importStar(require("http"));
 const therapists = new Map();
 const headsets = new Map();
-console.log("Hello?");
+
 const server = http.createServer();
 const PORT = process.env.PORT || 8080;
 const wss = new ws_1.WebSocketServer({ server });
-console.log(`[DEBUG] WebSocket engine instantiated directly on port ${PORT}`);
+
+console.log(`WebSocket engine instantiated directly on port ${PORT}`);
+
 wss.on('connection', (socket, request) => {
     const urlParams = new URL(request.url || '', `http://${request.headers.host}`);
     const clientRole = urlParams.searchParams.get('role');
@@ -101,6 +103,7 @@ function handleIncomingRoute(rawData, senderSocket) {
         console.error("Failed to route incoming message payload: ", error);
     }
 }
+
 server.listen(PORT, () => {
     console.log(`Signaling server traffic controller active on port ${PORT}`);
 });

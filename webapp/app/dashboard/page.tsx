@@ -17,6 +17,7 @@ export default function DashboardOverviewPage() {
   const supabase = createClient();
   const { clearDevices } = useDevices();
 
+  //when user logs out of their account, clear all sensitive variables
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -51,7 +52,6 @@ export default function DashboardOverviewPage() {
         </h2>
       </div>
 
-      {/* Cards Section */}
       <div className="grid grid-cols-2 place-items-center gap-12 w-4/5 h-4/5">
         <Link className="h-full w-4/5 block" href="/dashboard/test">
           <Card className="h-full w-full">
@@ -77,6 +77,5 @@ export default function DashboardOverviewPage() {
       </div>
     </div>
   )
-  //TODO: Decide how the dashboard will look for each user. 
-  //Depends on whether clinical or researcher version. How to identify?
+  //would we like this to be different between the clinican and the researcher 
 }

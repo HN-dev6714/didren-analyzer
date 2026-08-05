@@ -44,24 +44,22 @@ export function AddHeadsetForm() {
                 .gt('expiration', now.toISOString())
                 .maybeSingle();
 
+            if (codeError || !validCodeEntry) {
+            //error! 
                 if (codeError) {
                     console.error("Database query failed:", codeError);
                 } else {
-                    console.log("--- Debugging Device Code Records ---");
-                    console.table(validCodeEntry);
+                    console.error("Code not valid or expired (no entry found)");
                 }
-            
-            if (codeError || !validCodeEntry){
-                setStatusMessage({ type: 'error', text: 'Invalid or expired code. Please try again.'});
-                if(!validCodeEntry){
-                    console.error('not valid code')
-                }
-                else{
-                    console.error(codeError);
-                }
+
+                //display error message
+                setStatusMessage({ type: 'error', text: 'Invalid or expired code. Please try again.' });
                 setIsLoading(false);
                 return;
             }
+
+            //success!
+            console.table(validCodeEntry);
 
             const { error: headsetUpdateError } = await supabase
                 .from('headsets')
@@ -89,6 +87,7 @@ export function AddHeadsetForm() {
                 return;
             }
 
+            //add the mapping by calling the addDevice function
             addDevice({
                 headset_serial: validCodeEntry.headset_serial,
                 code: 'PAIRED',
@@ -123,7 +122,7 @@ export function AddHeadsetForm() {
                 Enter the code shown on the VR Headset Screen:
             </p>
         </div>
-
+        {/* input 1: type in the code */}
         <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200 ">Pairing Code</label>
             <input 
@@ -136,7 +135,7 @@ export function AddHeadsetForm() {
                 className="text-zinc-900 dark:text-zinc-300 h-10 bg-zinc-200 dark:bg-zinc-800 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest uppercase text-center font-mono focus:outline-none focus:border-teal-500"
             />
         </div>
-
+        {/* input 2: type in a nickname */}
         <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200 ">Headset Name</label>
             <input 
@@ -149,7 +148,7 @@ export function AddHeadsetForm() {
                 className="text-zinc-900 dark:text-zinc-300 h-10 bg-zinc-200 dark:bg-zinc-800 border border-zinc-800 rounded-lg px-3 text-sm tracking-widest text-center font-mono focus:outline-none focus:border-teal-500"
             />
         </div>
-
+        {/* display message if necessary */}
         {statusMessage.type && (
             <div className={`text-xs text-center font-medium p-2 rounded ${
                     statusMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'

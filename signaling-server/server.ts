@@ -26,6 +26,7 @@ wss.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
     //check incoming connections URLs. If connection comes from Unity, 
     //parse serial number and run headsets.set(serial, socket);
     //if website, run therapists.set(therapistId, socket);
+    
     if(clientRole === 'headset' && clientId){
         headsets.set(clientId, socket);
         console.log(`Headset Registered: ${ clientId }`);

@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true)
     setErrorMsg(null)
 
-    // Call the Supabase SDK Auth function
+    //calls the Supabase SDK Auth function
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -33,7 +33,7 @@ export default function LoginPage() {
       setErrorMsg(error.message)
       setLoading(false)
     } else {
-      // Login successful! Next.js will route the user to the secure cockpit
+      //login success, send user to dashboard
       router.push("/dashboard")
       router.refresh()
     }

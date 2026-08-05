@@ -4,6 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+//overall modal template
 export function ModalWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 

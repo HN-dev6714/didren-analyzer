@@ -38,29 +38,14 @@ interface TestSettingsPayload{
     cursor_trail: boolean;
     validation_time: number;
 }
-/**
- * This is where the Clinician/Researcher will test patients
- * 
- * The following (proposed) specifications are as follows:
- * - The user will select a given headset or be given the option to add a headset. 
- * - If the user decides to add a headset, a pop-up modal will appear 
- * (how do we establish a connection?) asking for a six-digit code. This six-digit code
- * would be sent to the device and must be typed in the user account to be connected. 
- * - If the user decides to select an already using headset (that is linked to that userID
- * in Supabase), it must check if
- * the camera is on (the device is powered on) and currently within the application
- * - Once a headset is selected, the user will be able to type in patient and test parameters 
- * (this may have to rewire how the headset receives a test)
- * - The headset could also be screened as a live video feed to this part. On the left hand side, 
- * there is information about the patient and the test. 
- * A back button to return to the dashboard
- * 
- */
+
 export default function TestingPage(){
 
     const { devices, isLoading } = useDevices();
     const [errorMessage, setErrorMessage] = useState('');
     const { socket, isConnected } = useSocket();
+
+    //list of default data as state variables need a default state
     const [formPatientData, setFormPatientData] = useState<PatientPayload>({
         first_name: '',
         surname: '',
@@ -109,12 +94,14 @@ export default function TestingPage(){
         validation_time: 1.5
     });
 
+    //this function sends data to the web socket server for the headset to see
+    //notice how we use two different types of payloads
     function sendSessionSetup(patient: PatientPayload, settings: TestSettingsPayload) {
-    // 1. Ensure the socket exists and is in the OPEN state before trying to send
+    //checks if socket exists and is in the open state
     if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
         
         const runtimeSetupMessage = {
-            targetId: "TEST_THERAPIST_123", // change to the active headset
+            targetId: "TEST_THERAPIST_123", //change to the active headset
             action: "LOAD_SESSION",
             payload: {
                 patient_profile: {
@@ -151,6 +138,7 @@ export default function TestingPage(){
     }
 }
 
+    //this function simply checks if the web socket server exists (used for testing, should be able to be deleted)
     function serverCheck() {
         if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
             const clickTestMessage = {
@@ -166,6 +154,7 @@ export default function TestingPage(){
         }
     }
 
+    //this function attempts to retrieve session info if the web socket is open
     function retrieveSessionInfo(){
         if (socket && isConnected && (socket.readyState === WebSocket.OPEN)) {
             socket.onmessage = (e) => {
@@ -260,6 +249,7 @@ export default function TestingPage(){
                         Add Headset
                     </Link>
                 </div>
+                {/* section 1: sending information to web socket */}
                 <div className="flex justify-center items-center gap-12 w-full">
                     <Card className="flex-1 bg-white dark:bg-black w-1/3 p-6">
                     <div className="flex flex-col px-12 w-full gap-4 mt-4">
@@ -430,6 +420,7 @@ export default function TestingPage(){
 
                         </canvas>
                     </div>
+                    {/* section 2: reading information from web socket */}
                     <div className="flex-1">
                         <Card className="bg-white dark:bg-black p-6 mt-6">
                             <PayloadComponent title="Patient Data" payload={committedPatientData} />
