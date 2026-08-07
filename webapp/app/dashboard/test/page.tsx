@@ -253,7 +253,7 @@ export default function TestingPage(){
                 <div className="flex justify-center items-center gap-12 w-full">
                     <Card className="flex-1 bg-white dark:bg-black w-1/3 p-6">
                     <div className="flex flex-col px-12 w-full gap-4 mt-4">
-                        <h3 className="text-center text-2xl font-bold underline text-zinc-700 dark:text-zinc-300">
+                        <h3 className="text-center text-2xl font-bold text-zinc-700 dark:text-zinc-300">
                             Send Patient and Test Information to Headset:
                         </h3>
                         <div className="grid grid-cols-2 justify-center gap-8">

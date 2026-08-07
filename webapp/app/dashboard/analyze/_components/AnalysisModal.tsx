@@ -26,8 +26,7 @@ export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds
                 
                 <div className="p-4 border-b border-zinc-200 dark:border-zinc-700 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900">
                     <div>
-                        <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-100">Filter & Select Sessions</h2>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-100">Configure parameters to narrow down metrics data sets.</p>
+                        <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-100">Filter and Select Sessions</h2>
                     </div>
                     <button 
                         onClick={onClose}
@@ -59,6 +58,6 @@ export default function AnalysisModal({isOpen, onClose, sessionList, selectedIds
                 </div>
 
             </div>
-    </div>
+        </div>
     );
 }

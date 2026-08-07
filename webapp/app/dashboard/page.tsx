@@ -56,7 +56,7 @@ export default function DashboardOverviewPage() {
         <Link className="h-full w-4/5 block" href="/dashboard/test">
           <Card className="h-full w-full">
             <CardContent className="flex flex-col h-full justify-center items-center p-8">
-              <TargetIcon className="w-full h-full h-3/4 dark:text-teal-400 text-teal-600" />
+              <TargetIcon className="w-full h-full h-3/4 dark:fill-teal-400 fill-teal-600" />
               <h2 className="mt-auto text-3xl font-bold text-center">
                 Test
               </h2>
@@ -67,7 +67,7 @@ export default function DashboardOverviewPage() {
         <Link className="h-full w-4/5 block" href="/dashboard/analyze">
           <Card className="h-full w-full">
             <CardContent className="flex flex-col h-full justify-center items-center p-8">
-              <MagnifyingGlassIcon className="w-full h-full h-3/4 dark:text-teal-400 text-teal-600" />
+              <MagnifyingGlassIcon className="w-full h-full h-3/4 dark:fill-teal-400 fill-teal-600" />
               <h2 className="mt-auto text-3xl font-bold text-center">
                 Analyze
               </h2>

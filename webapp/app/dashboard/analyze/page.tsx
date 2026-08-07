@@ -9,6 +9,7 @@ import { TEAMP_FILTERS }from './_components/ParameterForm';
 import { ThemeToggle } from '@/components/ui/themeButton';
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
+import  DiagramModal from "./_components/Diagram";
 
 //very long session interface, is this why everything is running slowly? 
 export interface Session {
@@ -195,6 +196,8 @@ export default function AnalyzingPage() {
     const [chartData, setChartData] = useState<any[]>([]);
     const [summaryMetrics, setSummaryMetrics] = useState<CohortMetric[]>([]);
     const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+
+    const[isDiagramOpen, setIsDiagramOpen] = useState(false);
 
 
     function generateChartData(
@@ -563,7 +566,12 @@ export default function AnalyzingPage() {
                     </button>
                 </Link>
                 <div className="absolute top-8 right-8">
-                    <ThemeToggle />
+                    <div className="flex justify-center gap-4">
+                        <button onClick={() => setIsDiagramOpen(true)} className="bg-zinc-800 dark:bg-zinc-200 text-zinc-100 dark:text-zinc-900 px-3 rounded-md text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-300 transition-colors">
+                            Reference Diagram
+                        </button>
+                        <ThemeToggle />
+                    </div>
                 </div>
                 <h1 className="text-center text-zinc-700 dark:text-zinc-100 text-5xl font-bold">
                     Analyzer Application
@@ -596,7 +604,7 @@ export default function AnalyzingPage() {
                     <div>
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="flex justify-center items-center text-center mx-auto rounded h-8 w-48 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
+                            className="flex justify-center items-center text-center mx-auto rounded h-8 px-3 bg-teal-800 text-zinc-100 font-medium text-sm hover:bg-teal-700 transition-colors"
                         >
                             Select or Filter Sessions
                         </button>
@@ -611,7 +619,11 @@ export default function AnalyzingPage() {
                     updateSessions={() => handleSubmitSelection()}
                     onSubmitFilters={handleApplyFilters}
                     currentFilters={savedFilterStates}
-                />                   
+                />      
+                <DiagramModal
+                    isOpen = {isDiagramOpen}
+                    onClose={() => setIsDiagramOpen(false)}
+                />
             </div>
             <div className="flex w-full justify-center items-center">
                 <Card className="bg-white dark:bg-black w-full p-6 mt-4">
